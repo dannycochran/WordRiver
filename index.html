@@ -23,21 +23,24 @@
 			var wordSet = [];
 			for (i=0;i<json[0].length;i++){
 				for (j=0;j<json[0][0].length;j++) {
-					wordSet.push(json[0][i][j].word);
+					wordSet.push({word: json[0][i][j].word, frequency: json[0][i][j].frequency});
 				}
 			}
-            words.data(json).enter()
+			console.log(wordSet);
+            words.data(wordSet).enter()
   			.append("svg:text")
   			.attr("width",50)
   			.attr("height",20)
   			.attr("y", function(d,i) {
-  				return(i*21)
+  				return((i+1)*25)
   			})
   			.attr("x",1)
-        	.style("font-size", function(d) { return d[0][0].frequency * 5 + "px"; })
+        	.style("font-size", function(d) { return d.frequency * 10 + "px"; })
 			.style("font-family", "Impact")
 			.style("fill", function(d, i) { return fill(i); })
-			.text(wordSet);
+			.text(function(d) {
+				return d.word
+			});
 		})
 	</script>
 </body>
