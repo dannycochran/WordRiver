@@ -17,11 +17,17 @@
 		var svg = d3.select("body")
 			.append("svg")
 	        .attr("width", width)
-	        .attr("height", height)
-		var words = svg.selectAll("rect");
+	        .attr("height", height);
+		var words = svg.selectAll("text");
   		d3.json("twitterWords.json", function(json) {
+			var wordSet = [];
+			for (i=0;i<json[0].length;i++){
+				for (j=0;j<json[0][0].length;j++) {
+					wordSet.push(json[0][i][j].word);
+				}
+			}
             words.data(json).enter()
-  			.append("rect")
+  			.append("svg:text")
   			.attr("width",50)
   			.attr("height",20)
   			.attr("y", function(d,i) {
@@ -31,11 +37,7 @@
         	.style("font-size", function(d) { return d[0][0].frequency * 5 + "px"; })
 			.style("font-family", "Impact")
 			.style("fill", function(d, i) { return fill(i); })
-			.append("text")
-			.text((function(d) {
-				return(d[0][0].word);
-			}))
-			.style("color","black");
+			.text(wordSet);
 		})
 	</script>
 </body>
