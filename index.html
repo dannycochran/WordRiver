@@ -13,33 +13,40 @@
 	<script type="text/javascript">
   		var fill = d3.scale.category20();
   		var width = 800;
-  		var height = 900;
+  		var height = 3375;
 		var svg = d3.select("body")
 			.append("svg")
 	        .attr("width", width)
 	        .attr("height", height);
 		var words = svg.selectAll("text");
   		d3.json("twitterWords.json", function(json) {
-			var wordSet = [];
-			for (i=0;i<json[0].length;i++){
-				for (j=0;j<json[0][0].length;j++) {
-					wordSet.push({word: json[0][i][j].word, frequency: json[0][i][j].frequency});
+			var reformatted = [[],[],[],[],[],[],[]];
+				for (h=0;h<json[0].length;h++) {
+					for (a=0;a<json.length;a++) {
+						reformatted[h].push([]);
+					}
 				}
-			}
-			console.log(wordSet);
-            words.data(wordSet).enter()
+			console.log(reformatted);
+				for (c=0;c<json[0].length;c++) {
+					for (i=0;i<json.length;i++) {
+						for (j=0;j<json[0][0].length;j++) {
+							reformatted[c][i].push(json[i][c][j]);
+						}
+					}
+				}
+			words.data(reformatted).enter()
   			.append("svg:text")
   			.attr("width",50)
   			.attr("height",20)
   			.attr("y", function(d,i) {
-  				return((i+1)*25)
+  				return((i+1)*30)
   			})
   			.attr("x",1)
-        	.style("font-size", function(d) { return d.frequency * 10 + "px"; })
+        	.style("font-size", function(d) { return d[0][0].frequency * 5 + "px"; })
 			.style("font-family", "Impact")
 			.style("fill", function(d, i) { return fill(i); })
 			.text(function(d) {
-				return d.word
+				return d[0][0].word;
 			});
 		})
 	</script>
