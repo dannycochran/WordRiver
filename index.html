@@ -15,6 +15,7 @@
   		var width = 800;
   		var height = 3530;
 		var svg = d3.select("body")
+			.append("svg")
 	        .attr("width", width)
 	        .attr("height", height)
 		var words = svg.selectAll("rect");
@@ -29,11 +30,12 @@
   			.attr("x",1)
         	.style("font-size", function(d) { return d[0][0].frequency * 5 + "px"; })
 			.style("font-family", "Impact")
-			.style("color", function(d, i) { return fill(i); })
+			.style("fill", function(d, i) { return fill(i); })
+			.append("text")
 			.text((function(d) {
 				return(d[0][0].word);
 			}))
-
+			.style("color","black");
 		})
 	</script>
 </body>
