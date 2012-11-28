@@ -42,25 +42,36 @@
   	var words = svg.selectAll("text");
 
   	d3.json("twitterWords.json", function (json) {
-  	  words.data(json).enter()
+  		selection = words.data(json);
+  	  selection.enter()
   	    .append("svg:text")
   	    .attr("y", function (d, i) {
-  	    return ((i + 1) * 30)
-  	  })
+  	    	return (i + 1) * 30
+  	    })
   	    .attr("x", function (d, i) {
-  	    return (i + 10);
-  	  })
+  	    	return i;
+  	    })
   	    .style("font-size", function (d) { // function will go here to change font size by frequency
-  	    return d[0][0].frequency * 5 + "px";
-  	  })
+  	    	return d[0][0].frequency * 5 + "px";
+  	    })
   	    .style("font-family", "Impact") // function will go here to change font type by positivity
-  	  .style("fill", function (d, i) { // function will go here to change font color by positivity or objectivity
-  	    return fill(i);
-  	  })
+  	    .style("fill", function (d, i) { // function will go here to change font color by positivity or objectivity
+  	    	return fill(i);
+  	    })
+  	    .style("opacity", 0)
   	    .text(function (d) {
-  	    return d[0][0].word;
-  	  })
+  	    	return d[0][0].word;
+  	    });
+  	  selection
+  	  	.transition()
+  	  	.duration(5000)
+  	  		.attr("x", function(d, i) {
+	  	  		return i + 1000;
+  	  		})
+  	  		.style("opacity", 1);
   	})
+  	
+  	
 	</script>
 </body>
 </html>
