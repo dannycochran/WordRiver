@@ -1,13 +1,11 @@
-html {
-  min-width: 800px;
-  max-width:800px;
-}
+
 
 div h1 {
-	padding: 20px 50px;
+	padding: 10px 30px;
 	margin-top:-5px;
 	margin-bottom: -5px;
 	background: #4099FF;
 	color: white;
 	font-size: 50px;
+	max-width:600px;
 }

@@ -36,8 +36,9 @@
 		  .append("g")
 		    .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 		var words = svg.selectAll("text");
+		var switchBin = 0;
 		
-  		d3.json("twitterWords.json", function(json) {
+  		d3.json("twitterWords1.json", function(json) {
 			words.data(json).enter()
   			.append("svg:text")
   			.attr("y", function(d,i) {
@@ -47,13 +48,12 @@
   				return(i+10);
   			})
         	.style("font-size", function(d) { // function will go here to change font size by frequency
-        		return d[0][0].frequency * 5 + "px"; 
-        		})
+								return d[0][0].frequency * 5 + "px";
+			})
 			.style("font-family", "Impact") // function will go here to change font type by positivity
 			.style("fill", function(d, i) { // function will go here to change font color by positivity or objectivity
 				return fill(i); 
 			})
-
 			.text(function(d) {
 				return d[0][0].word;
 			})

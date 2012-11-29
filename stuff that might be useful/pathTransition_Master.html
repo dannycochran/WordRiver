@@ -25,88 +25,74 @@
 
 var n = 40,
     random = d3.random.normal(0, .2);
-function chart(domain, interpolation, tick) {
-  var oldData = d3.range(n).map(random);
-  var data = ["HelloWorld!","rob","said","as","were","happy","gifting","bubbly","derpaherp"]
-<!--   var data1 = d3.json("twitterWords.json",function(json){words.data(json).enter().append("svg:text")}) -->
+
+function chart(domain, tick) {  
+  var data = [0.1569522938535228, 0.2285423587876039, 0.19432918360974027, 0.015598105287104484, 0.3144576740975088, -0.37854035051800405, 0.19366710294942466, -0.2472452896306453, 0.07992687659551803, 0.16139251853405265, -0.0840872474049506, -0.564805111413184, 0.24779732068439156, -0.23685291846939655, -0.24687532335437506, 0.16675462907358457, 0.11492470123928654, 0.008964420653054242, 0.06263815368652623, 0.10443937365903894, -0.28377323452833336, 0.17482927587871475, 0.18199745150456062, -0.0569493562681071, 0.20637209422295755, 0.02614607146215077, -0.6487298895126393, 0.3965491228872076, -0.076909945148237, 0.3465752681084954, 0.07798465517935242, -0.1138275294521386, -0.3118556138158439, 0.015696088891324064, -0.5362974698274806, 0.04534264204111194, -0.19106246931208232, 0.04078072082880366, -0.17194073510738306, -0.2640389781060807]
+  
   var margin = {top: 6, right: 0, bottom: 6, left: 40},
       width = 960 - margin.right,
       height = 120 - margin.top - margin.bottom;
-	
+
   var x = d3.scale.linear()
       .domain(domain)
-      .range([0, width-200]);
+      .range([0, width]);
 
   var y = d3.scale.linear()
-      .domain([-0.6,0.6])
-      .range([height, 0])
-  				
+      .domain([-1, 1])
+      .range([height, 0]);
+
+  var line = d3.svg.line()
+      .x(function(d, i) { return x(i); })
+      .y(function(d, i) { return y(d); });
+
   var svg = d3.select("body").append("p").append("svg")
       .attr("width", width + margin.left + margin.right)
       .attr("height", height + margin.top + margin.bottom)
       .style("margin-left", -margin.left + "px")
     .append("g")
       .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
-  
-  var words = svg.selectAll("text");
 
-  var text = words.data(data).enter().append("svg:text")
-  		.attr("y", function(d,i) {
-  				return (i + 2) * 10 })
-  		.attr("x",function(d,i) {
-  				return (i * 80 )})
-  		.text(function(d) {return d});
-  				
   svg.append("defs").append("clipPath")
       .attr("id", "clip")
     .append("rect")
-      .attr("width", width-200)
+      .attr("width", width)
       .attr("height", height);
 
   svg.append("g")
       .attr("class", "y axis")
       .call(d3.svg.axis().scale(y).ticks(5).orient("left"));
 
-  svg.append("g")
-      .attr("class", "x axis")
-      .call(d3.svg.axis().scale(x).ticks(10).orient("bottom"));
-
   var path = svg.append("g")
       .attr("clip-path", "url(#clip)")
     .append("path")
       .data([data])
-      .attr("class", "text")
-      .attr("d", text);
+      .attr("class", "line")
+      .attr("d", line);
 
-  tick(path, text, data, x);
+  tick(path, line, data, x);
 }
 
-</script>
+<!-- chart([0,39]) -->
 
-<h1>Path Transitions</h1>
-
-<script>
-
-chart([0, n-1], "linear", function tick(path, text, data, x) {
+chart([0, n - 1], function tick(path, line, data, x) {
 
   // push a new data point onto the back
-  data.push("bob");
+  data.push(random());
 
   // redraw the line, and then slide it to the left
   path
-      .attr("d", text)
+      .attr("d", line)
       .attr("transform", null)
     .transition()
       .duration(750)
       .ease("linear")
       .attr("transform", "translate(" + x(-1) + ")")
-      .each("end", function() { tick(path, text, data, x); });
+      .each("end", function() { tick(path, line, data, x); });
 
   // pop the old data point off the front
-  data.shift(); 
+  data.shift();
 
 });
-
 </script>
 </body>
 </html>
