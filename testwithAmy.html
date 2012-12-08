@@ -52,11 +52,11 @@ var data = randomData()
 
 var lanes = ["0-1 Miles","1-5 Miles","5-10 Miles","10-50 miles","50-100 Miles","100-500 Miles", "500-1000 Miles"]
 
-var json1;
+var jsonData;
 
 d3.json("twitterWordsNoArray.json", function (json) {
 
-json1=json;
+jsonData=json;
 
 var margin = {top: 20, right: 15, bottom: 15, left: 60}
   , width = 960 - margin.left - margin.right
@@ -64,10 +64,10 @@ var margin = {top: 20, right: 15, bottom: 15, left: 60}
   , miniHeight = lanes.length * 12 + 50
   , mainHeight = height - miniHeight - 50;
 
-x = d3.scale.linear()
+var x = d3.scale.linear()
 	.domain([0,168])
 	.range([0, width]);
-x1 = d3.scale.linear().range([0, width]);
+var x1 = d3.scale.linear().range([0, width]);
 
 var ext = d3.extent(lanes, function(d,i) { return i; });
 var y1 = d3.scale.linear().domain([ext[0], ext[1] + 1]).range([0, mainHeight]);
@@ -266,7 +266,7 @@ function display (mini,itemRects) {
 	var rects, labels
 	  , minExtent = d3.scale.linear(brush.extent()[0])
 	  , maxExtent = d3.scale.linear(brush.extent()[1])
-	  , visItems = json1.filter(function (d) {return d.time_bin < maxExtent && d.time_bin > minExtent});
+	  , visItems = jsonData.filter(function (d) {return d.time_bin < maxExtent && d.time_bin > minExtent});
 
 	//mini.select('.brush').call(brush.extent([minExtent, maxExtent]));		
 
@@ -342,8 +342,8 @@ function moveBrush () {
 	var origin = d3.mouse(this)
 	  , point = x.invert(origin[0])
 	  , halfExtent = (brush.extent()[1] - brush.extent()[0] / 2)
-	  , start = new Date(point - halfExtent)
-	  , end = new Date(point + halfExtent);
+	  , start = (point - halfExtent)
+	  , end = (point + halfExtent);
 
 	brush.extent([start,end]);
 	display();
