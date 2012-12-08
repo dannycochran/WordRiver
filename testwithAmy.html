@@ -45,7 +45,7 @@ var lanes = ["0-1 Miles","1-5 Miles","5-10 Miles","10-50 miles","50-100 Miles","
 
 var jsonData;
 
-d3.json("twitterWords.json", function (json) {
+d3.json("twitterWords1.json", function (json) {
 
 jsonData=json;
 
@@ -302,13 +302,13 @@ function display () {
 		.data(visItems, function (d,i) { return i; })
 		.attr('x', function(d) { return x(d.time_bin); })
 		.attr('y', function(d) { return y1(d.dist_bin) + .1 * y1(1) + 0.5; })
-		.attr('width', function(d) { return x1(d.word.length*5) })
+		.attr('width', function(d) { return x(d.word.length*5) })
 		.style("fill", function(d, i) {return fill(i);});	
 
 	rects.enter().append('rect')
 		.attr('x', function(d) { return x(d.time_bin); })
 		.attr('y', function(d) { return y1(d.dist_bin) + .1 * y1(1) + 0.5; })
-		.attr('width', function(d) { return x1(d.word.length*5) })
+		.attr('width', function(d) { return x(d.word.length) })
 		.attr('height', function(d) { return .8 * y1(1); })
 		.attr('class', function(d) { return 'mainItem '; })
 		.style("fill", function(d, i) {return fill(i);});	
