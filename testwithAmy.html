@@ -15,21 +15,12 @@
 	font: 12px sans-serif;	
 }
 
-.month text {
-	text-anchor: start;
-}
-
 .axis line, .axis path {
 	stroke: black;
 }
 
 .miniItem {
 	stroke-width: 6;	
-}
-
-.future {
-	stroke: gray;
-	fill: #ddd;
 }
 
 .brush .extent {
@@ -244,7 +235,7 @@ display();
 })
 
 function display () {
-
+	var fill = d3.scale.category20();
 	var rects, labels
 	  , minExtent = brush.extent()[0]
 	  , maxExtent = brush.extent()[1]
@@ -309,15 +300,18 @@ function display () {
 	// upate the item rects
 	rects = itemRects.selectAll('rect')
 		.data(visItems, function (d,i) { return i; })
-		.attr('x', function(d) { return x1(d.time_bin); })
-		.attr('width', function(d) { return x1(d.frequency) });
+		.attr('x', function(d) { return x(d.time_bin); })
+		.attr('y', function(d) { return y1(d.dist_bin) + .1 * y1(1) + 0.5; })
+		.attr('width', function(d) { return x1(d.word.length*5) })
+		.style("fill", function(d, i) {return fill(i);});	
 
 	rects.enter().append('rect')
-		.attr('x', function(d) { return x1(d.time_bin); })
+		.attr('x', function(d) { return x(d.time_bin); })
 		.attr('y', function(d) { return y1(d.dist_bin) + .1 * y1(1) + 0.5; })
-		.attr('width', function(d) { return x1(d.frequency) })
+		.attr('width', function(d) { return x1(d.word.length*5) })
 		.attr('height', function(d) { return .8 * y1(1); })
-		.attr('class', function(d) { return 'mainItem '; });
+		.attr('class', function(d) { return 'mainItem '; })
+		.style("fill", function(d, i) {return fill(i);});	
 
 	rects.exit().remove();
 
@@ -343,7 +337,7 @@ function moveBrush () {
 	  , start = (point - halfExtent)
 	  , end = (point + halfExtent);
 	  console.log(brush.extent()[0]);
-	brush.extent([0,5]);
+	brush.extent([0,4]);
 	display();
 }
 
