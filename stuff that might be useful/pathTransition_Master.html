@@ -68,6 +68,7 @@ function chart(domain, tick) {
       .data([data])
       .attr("class", "line")
       .attr("d", line);
+      console.log(line);
 
   tick(path, line, data, x);
 }

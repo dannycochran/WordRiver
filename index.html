@@ -93,14 +93,16 @@
   	    .style("fill", function (d, i) { // function will go here to change font color by positivity or objectivity
   	    	return fill(i);
   	    })
-  	    .style("opacity", 0)
+  	    .style("opacity", .5)
   	    .text(function (d) {
+
   	    	return d[0][0].word;
   	    });
   	  selection
   	  	.transition()
-  	  	.duration(5000)
+  	  	.duration(10000)
   	  		.attr("x", function(d, i) {
+  				c++
 	  	  		return i + 1000;
   	  		})
   	  		.style("opacity", 1);
