@@ -230,13 +230,13 @@ function display () {
 	// upate the item rects
 	rects = itemRects.selectAll('rect')
 		.data(visItems, function (d,i) { return i; })
-		.attr('x', function(d) { return x(d.time_bin); })
+		.attr('x', function(d) { return x1(d.time_bin); })
 		.attr('y', function(d) { return y1(d.dist_bin) + .1 * y1(1) + 0.5; })
 		.attr('width', function(d) { return x(d.word.length*5) })
 		.style("fill", function(d, i) {return fill(i);});	
 
 	rects.enter().append('rect')
-		.attr('x', function(d) { return x(d.time_bin); })
+		.attr('x', function(d) { return x1(d.time_bin); })
 		.attr('y', function(d) { return y1(d.dist_bin) + .1 * y1(1) + 0.5; })
 		.attr('width', function(d) { return x(d.word.length) })
 		.attr('height', function(d) { return .8 * y1(1); })
@@ -248,11 +248,11 @@ function display () {
 	// update the item labels
 	labels = itemRects.selectAll('text')
 		.data(visItems, function (d) { return d.word; })
-		.attr('x', function(d) { return x(Math.max(d.time_bin, minExtent)) + 2; });
+		.attr('x', function(d) { return x1(Math.max(d.time_bin, minExtent)) + 2; });
 				
 	labels.enter().append('text')
 		.text(function (d) { return d.word; })
-		.attr('x', function(d) { return x(Math.max(d.time_bin, minExtent)) + 2; })
+		.attr('x', function(d) { return x1(Math.max(d.time_bin, minExtent)) + 2; })
 		.attr('y', function(d) { return y1(d.dist_bin) + .4 * y1(1) + 0.5; })
 		.attr('text-anchor', 'start')
 		.attr('class', 'itemLabel');
