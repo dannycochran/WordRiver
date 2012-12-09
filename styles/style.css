@@ -1,11 +1,11 @@
-
-
 div h1 {
 	padding: 10px 30px;
 	margin-top:-5px;
 	margin-bottom: -5px;
+	margin-left:102px;
 	background: #4099FF;
 	color: white;
-	font-size: 50px;
-	max-width:600px;
+	font-size: 60px;
+	max-width:783px;
+	text-align: center;
 }
