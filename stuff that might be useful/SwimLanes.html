@@ -58,7 +58,6 @@ var data = randomData()
   , lanes = data.lanes
   , items = data.items
   , now = new Date();
-console.log(data);
 
 var margin = {top: 20, right: 15, bottom: 15, left: 60}
   , width = 960 - margin.left - margin.right
@@ -295,7 +294,7 @@ function display () {
 		.attr('height', function(d) { return .8 * y1(1); })
 		.attr('class', function(d) { return 'mainItem ' + d.class; });
 
-/* 	rects.exit().remove(); */
+	rects.exit().remove();
 
 	// update the item labels
 	labels = itemRects.selectAll('text')
@@ -332,7 +331,6 @@ function getPaths(items) {
 		d = items[i];
 		if (!paths[d.class]) paths[d.class] = '';	
 		paths[d.class] += ['M',x(d.start),(y2(d.lane) + offset),'H',x(d.end)].join(' ');
-		console.log(d.class);
 	}
 
 	for (var className in paths) {

@@ -43,25 +43,18 @@
 
 <script type="text/javascript">
 
-/*
-var data = randomData()
-  , lanes = data.lanes
-  , items = data.items
-  , now = new Date();
-*/
-
-var lanes = ["0-1 Miles","1-5 Miles","5-10 Miles","10-50 miles","50-100 Miles","100-500 Miles", "500-1000 Miles"]
+var distanceBins = ["0-1 Miles","1-5 Miles","5-25 Miles","25-100 Miles","100-500 Miles","500-1000 Miles", "1000-3000 Miles"]
 
 var jsonData;
 
-d3.json("twitterWords1.json", function (json) {
+d3.json("twitterWords2.json", function (json) {
 
 jsonData=json;
 
 var margin = {top: 20, right: 15, bottom: 15, left: 100}
   , width = 960 - margin.left - margin.right
   , height = 500 - margin.top - margin.bottom
-  , miniHeight = lanes.length * 12 + 50
+  , miniHeight = distanceBins.length * 12 + 50
   , mainHeight = height - miniHeight - 50;
 
 x = d3.scale.linear()
@@ -69,7 +62,7 @@ x = d3.scale.linear()
 	.range([0, width]);
 x1 = d3.scale.linear().range([0, width]);
 
-var ext = d3.extent(lanes, function(d,i) { return i; });
+var ext = d3.extent(distanceBins, function(d,i) { return i; });
 y1 = d3.scale.linear().domain([ext[0], ext[1] + 1]).range([0, mainHeight]);
 y2 = d3.scale.linear().domain([ext[0], ext[1] + 1]).range([0, miniHeight]);
 
@@ -85,7 +78,7 @@ chart.append('defs').append('clipPath')
 		.attr('width', width)
 		.attr('height', mainHeight);
 
-var main = chart.append('g')
+main = chart.append('g')
 	.attr('transform', 'translate(' + margin.left + ',' + margin.top + ')')
 	.attr('width', width)
 	.attr('height', mainHeight)
@@ -97,9 +90,9 @@ mini = chart.append('g')
 	.attr('height', miniHeight)
 	.attr('class', 'mini');
 
-// draw the lanes for the main chart
+// draw the distanceBins for the main chart
 main.append('g').selectAll('.laneLines')
-	.data(lanes)
+	.data(distanceBins)
 	.enter().append('line')
 	.attr('x1', 0)
 	.attr('y1', function(d,i) { return d3.round(y1(i)) + 0.5; })
@@ -108,7 +101,7 @@ main.append('g').selectAll('.laneLines')
 	.attr('stroke', function(d,i) { return 'lightgray' });
 
 main.append('g').selectAll('.laneText')
-	.data(lanes)
+	.data(distanceBins)
 	.enter().append('text')
 	.text(function(d) { return d; })
 	.attr('x', -10)
@@ -117,9 +110,9 @@ main.append('g').selectAll('.laneText')
 	.attr('text-anchor', 'end')
 	.attr('class', 'laneText');
 
-// draw the lanes for the mini chart
+// draw the distanceBins for the mini chart
 mini.append('g').selectAll('.laneLines')
-	.data(lanes)
+	.data(distanceBins)
 	.enter().append('line')
 	.attr('x1', 0)
 	.attr('y1', function(d,i) { return d3.round(y2(i)) + 0.5; })
@@ -128,7 +121,7 @@ mini.append('g').selectAll('.laneLines')
 	.attr('stroke', function(d) { return d === '' ? 'white' : 'lightgray' });
 
 mini.append('g').selectAll('.laneText')
-	.data(lanes)
+	.data(distanceBins)
 	.enter().append('text')
 	.text(function(d) { return d; })
 	.attr('x', -10)
@@ -138,61 +131,24 @@ mini.append('g').selectAll('.laneText')
 	.attr('class', 'laneText');
 
 // draw the x axis
-/*
-var xDateAxis = d3.svg.axis()
-	.scale(x)
-	.orient('bottom')
-	.ticks(x.domain()[1] - x.domain()[0])
-	.tickSize(6, 0, 0);
-
-var x1DateAxis = d3.svg.axis()
-	.scale(x1)
-	.orient('bottom')
-	.ticks(d3.time.days, 1)
-	.tickSize(6, 0, 0);
-
-var xMonthAxis = d3.svg.axis()
+xDateAxis = d3.svg.axis()
 	.scale(x)
 	.orient('top')
-	.ticks(d3.time.months, 1)
-	.tickFormat(d3.time.format('%b %Y'))
+	.ticks(20)
 	.tickSize(15, 0, 0);
 
-var x1MonthAxis = d3.svg.axis()
-	.scale(x1)
-	.orient('top')
-	.ticks(d3.time.mondays, 1)
-	.tickFormat(d3.time.format('%b - Week %W'))
-	.tickSize(15, 0, 0);
-*/
-
-/*
 main.append('g')
 	.attr('transform', 'translate(0,' + mainHeight + ')')
 	.attr('class', 'main axis date')
-	.call(x1DateAxis);
-
-main.append('g')
-	.attr('transform', 'translate(0,0.5)')
-	.attr('class', 'main axis month')
-	.call(x1MonthAxis)
-	.selectAll('text')
-		.attr('dx', 5)
-		.attr('dy', 12);
-
-mini.append('g')
-	.attr('transform', 'translate(0,' + miniHeight + ')')
-	.attr('class', 'axis date')
 	.call(xDateAxis);
-
+	
 mini.append('g')
 	.attr('transform', 'translate(0,0.5)')
 	.attr('class', 'axis month')
-	.call(xMonthAxis)
+	.call(xDateAxis)
 	.selectAll('text')
-		.attr('dx', 5)
+		.attr('dx', 9)
 		.attr('dy', 12);
-*/
 
 // draw the items
 var fill = d3.scale.category20();
@@ -210,13 +166,13 @@ mini.append('g').selectAll('miniItems')
 	.attr("height",y2(1)*.5)
 	.style("fill", function(d, i) {return fill(i);});
 	
-/*
-	mini.append('g').selectAll('miniItems')
-	.data(getPaths(items))
+
+mini.append('g').selectAll('miniItems')
+	.data(getPaths(jsonData))
 	.enter().append('path')
 	.attr('class', function(d) { return 'miniItem ' + d.class; })
 	.attr('d', function(d) { return d.path; });
-*/
+
 	
 // invisible hit area to move around the selection window
 mini.append('rect')
@@ -240,7 +196,7 @@ mini.append('g')
 	.attr('height', miniHeight - 1);
 
 mini.selectAll('rect.background').remove();
-display();
+display(x1);
 })
 
 function display () {
@@ -249,62 +205,27 @@ function display () {
 	  , minExtent = brush.extent()[0]
 	  , maxExtent = brush.extent()[1]
 	  , visItems = jsonData.filter(function (d) {return d.time_bin < maxExtent && d.time_bin > minExtent});
-	console.log(visItems);
-	//mini.select('.brush').call(brush.extent([minExtent, maxExtent]));		
+	mini.select('.brush').call(brush.extent([minExtent, maxExtent]));		
 
-/*
+
 	x1.domain([minExtent, maxExtent]);
 
 	if ((maxExtent - minExtent) > 1468800000) {
-		x1DateAxis.ticks(d3.time.mondays, 1).tickFormat(d3.time.format('%a %d'))
-		x1MonthAxis.ticks(d3.time.mondays, 1).tickFormat(d3.time.format('%b - Week %W'))		
+		xDateAxis.ticks(d3.time.mondays, 1).tickFormat(d3.time.format('%a %d'))
 	}
 	else if ((maxExtent - minExtent) > 172800000) {
-		x1DateAxis.ticks(d3.time.days, 1).tickFormat(d3.time.format('%a %d'))
-		x1MonthAxis.ticks(d3.time.mondays, 1).tickFormat(d3.time.format('%b - Week %W'))
+		xDateAxis.ticks(d3.time.days, 1).tickFormat(d3.time.format('%a %d'))
 	}
 	else {
-		x1DateAxis.ticks(d3.time.hours, 4).tickFormat(d3.time.format('%I %p'))
-		x1MonthAxis.ticks(d3.time.days, 1).tickFormat(d3.time.format('%b %e'))
+		xDateAxis.ticks(d3.time.hours, 4).tickFormat(d3.time.format('%I %p'))
 	}
-*/
-
-
-	//x1Offset.range([0, x1(d3.time.day.ceil(now) - x1(d3.time.day.floor(now)))]);
 
 	// update the axis
-/*
-	main.select('.main.axis.date').call(x1DateAxis);
-	main.select('.main.axis.month').call(x1MonthAxis)
+
+	main.select('.main.axis.date').call(xDateAxis)
 		.selectAll('text')
 			.attr('dx', 5)
 			.attr('dy', 12);
-	// upate the item rects
-	rects = itemRects.selectAll('rect')
-		.data(visItems, function (d) { return d.id; })
-		.attr('x', function(d) { return x1(d.start); })
-		.attr('width', function(d) { return x1(d.end) - x1(d.start); });
-
-	rects.enter().append('rect')
-		.attr('x', function(d) { return x1(d.start); })
-		.attr('y', function(d) { return y1(d.lane) + .1 * y1(1) + 0.5; })
-		.attr('width', function(d) { return x1(d.end) - x1(d.start); })
-		.attr('height', function(d) { return .8 * y1(1); })
-		.attr('class', function(d) { return 'mainItem ' + d.class; });
-
-	rects.exit().remove();
-
-	// update the item labels
-	labels = itemRects.selectAll('text')
-		.data(visItems, function (d) { return d.id; })
-		.attr('x', function(d) { return x1(Math.max(d.start, minExtent)) + 2; });
-				
-	labels.enter().append('text')
-		.text(function (d) { return 'Item\n\n\n\n Id: ' + d.id; })
-		.attr('x', function(d) { return x1(Math.max(d.start, minExtent)) + 2; })
-		.attr('y', function(d) { return y1(d.lane) + .4 * y1(1) + 0.5; })
-		.attr('text-anchor', 'start')
-*/
 
 	// upate the item rects
 	rects = itemRects.selectAll('rect')
@@ -345,7 +266,6 @@ function moveBrush () {
 	  , halfExtent = (brush.extent()[1] - brush.extent()[0] / 2)
 	  , start = (point - halfExtent)
 	  , end = (point + halfExtent);
-	  console.log(brush.extent()[0]);
 	brush.extent([0,1]);
 	display();
 }
@@ -354,13 +274,12 @@ function moveBrush () {
 // generates a single path for each item class in the mini display
 // ugly - but draws mini 2x faster than append lines or line generator
 // is there a better way to do a bunch of lines as a single path with d3?
-/*
 function getPaths(jsonData) {
 	var paths = {}, d, offset = .5 * y2(1) + 0.5, result = [];
 	for (var i = 0; i < jsonData.length; i++) {
-		d = items[i];
+		d = jsonData[i];
 		if (!paths[d.class]) paths[d.class] = '';	
-		paths[d.class] += ['M',x(d.start),(y2(d.lane) + offset),'H',x(d.end)].join(' ');
+		paths[d.class] += ['M',x(d.time_bin+2),(y2(d.dist_bin+1) + offset),'H',x(d.time_bin+.01)].join(' ');
 	}
 
 	for (var className in paths) {
@@ -369,7 +288,6 @@ function getPaths(jsonData) {
 
 	return result;
 }
-*/
 
 </script>
 </body>
