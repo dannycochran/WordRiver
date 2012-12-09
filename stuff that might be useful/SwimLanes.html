@@ -58,6 +58,7 @@ var data = randomData()
   , lanes = data.lanes
   , items = data.items
   , now = new Date();
+console.log(data);
 
 var margin = {top: 20, right: 15, bottom: 15, left: 60}
   , width = 960 - margin.left - margin.right
@@ -243,6 +244,7 @@ mini.selectAll('rect.background').remove();
 display();
 
 function display () {
+
 	var rects, labels
 	  , minExtent = d3.time.day(brush.extent()[0])
 	  , maxExtent = d3.time.day(brush.extent()[1])
@@ -293,7 +295,7 @@ function display () {
 		.attr('height', function(d) { return .8 * y1(1); })
 		.attr('class', function(d) { return 'mainItem ' + d.class; });
 
-	rects.exit().remove();
+/* 	rects.exit().remove(); */
 
 	// update the item labels
 	labels = itemRects.selectAll('text')
@@ -316,8 +318,7 @@ function moveBrush () {
 	  , halfExtent = (brush.extent()[1].getTime() - brush.extent()[0].getTime()) / 2
 	  , start = new Date(point.getTime() - halfExtent)
 	  , end = new Date(point.getTime() + halfExtent);
-	  console.log(brush.extent()[0]);
-	  console.log(start,end);
+
 	brush.extent([start,end]);
 	display();
 }
@@ -331,6 +332,7 @@ function getPaths(items) {
 		d = items[i];
 		if (!paths[d.class]) paths[d.class] = '';	
 		paths[d.class] += ['M',x(d.start),(y2(d.lane) + offset),'H',x(d.end)].join(' ');
+		console.log(d.class);
 	}
 
 	for (var className in paths) {
