@@ -1,33 +1,34 @@
+<!DOCTYPE html>
 <html>
 <head>
-<meta charset="utf-8">
+  <meta charset="utf-8">
 <title>A River of Twitter Data</title>
-<script type="text/javascript" src="lib/d3.v2.min.js"></script>
+<script src="lib/d3.v2.min.js"></script>
 <script type="text/javascript" src="http://code.jquery.com/jquery-1.6.2.min.js"></script>
-<script type="text/javascript" src="https://raw.github.com/jaz303/tipsy/master/src/javascripts/jquery.tipsy.js"></script>
-<script src="http://code.jquery.com/ui/1.9.1/jquery-ui.js"></script>
+<script type="text/javascript" src="lib/jquery.tipsy.js"></script>          
+<script type="text/javascript" src="http://code.jquery.com/ui/1.9.1/jquery-ui.js"></script>
 
-<link rel="stylesheet" href="http://code.jquery.com/ui/1.9.1/themes/base/jquery-ui.css" />
 <link rel="stylesheet" href="styles/style.css" type="text/css" /> 
 <link rel="stylesheet" href="styles/tipsy.css" type="text/css" />  
+<link rel="stylesheet" href="http://code.jquery.com/ui/1.9.1/themes/base/jquery-ui.css" />
 
 <div>
-	<h1>
-	<img src="lib/twitter-bird-white-on-blue1.png"/>
-	Activity, Hurricane Sandy
-	</h1>
-<!-- 	<img src="lib/background.jpeg" id="bg" alt=""> -->
+  <h1>
+  <img src="lib/twitter-bird-white-on-blue1.png"/>
+  Activity, Hurricane Sandy
+  </h1>
+<!--  <img src="lib/background.jpeg" id="bg" alt=""> -->
 </div>  
 </head>
 <body>
 
 <script type="text/javascript">
 
-var distanceBins = ["0-50 Miles","51-110 Miles","111-200 Miles","201-500 Miles","501-1000 Miles","1001-3000 Miles", "3000+ Miles"]
-	, fill = d3.scale.category20()
-	, jsonData
-	, max_extent_width = 20
-	, min_extent_width = 5;
+var distanceBins = [["0-50 Miles","Southern New Jersey"],["51-110 Miles","Includes Manhattan"],["111-200 Miles","Includes Washington D.C."],["201-500 Miles","Entire East Coast"],["501-1000 Miles","Midwest Region (including Chicago)"],["1000-3000 Miles","Continental U.S."],["3000+ Miles","Rest of the World excluding U.S."]]
+  , fill = d3.scale.category20()
+  , jsonData
+  , max_extent_width = 20
+  , min_extent_width = 5;
 
 d3.json("twitterWords2.json", function (json) {
 
@@ -40,218 +41,230 @@ var margin = {top: 20, right: 15, bottom: 15, left: 100}
   , mainHeight = height - miniHeight - 50;
 
 x = d3.scale.linear()
-	.domain([0,168])
-	.range([0, width]);
+  .domain([0,168])
+  .range([0, width]);
 x1 = d3.scale.linear().range([0, width]);
 
 colorScale = d3.scale.linear()
-	.domain([-200,200])
-	.range([80,120]);
-	
+  .domain([-200,200])
+  .range([80,120]);
+  
 var ext = d3.extent(distanceBins, function(d,i) { return i; });
 y1 = d3.scale.linear().domain([ext[0], ext[1] + 1]).range([0, mainHeight]);
 y2 = d3.scale.linear().domain([ext[0], ext[1] + 1]).range([0, miniHeight]);
 
 
 var chart = d3.select('body')
-	.append('svg:svg')
-	.attr('width', width + margin.right + margin.left)
-	.attr('height', height + margin.top + margin.bottom)
-	.attr('class', 'chart');
+  .append('svg:svg')
+  .attr('width', width + margin.right + margin.left)
+  .attr('height', height + margin.top + margin.bottom)
+  .attr('class', 'chart');
 
 chart.append('defs').append('clipPath')
-	.attr('id', 'clip')
-	.append('rect')
-		.attr('width', width)
-		.attr('height', mainHeight);
+  .attr('id', 'clip')
+  .append('rect')
+    .attr('width', width)
+    .attr('height', mainHeight);
 
 main = chart.append('g')
-	.attr('transform', 'translate(' + margin.left + ',' + margin.top + ')')
-	.attr('width', width)
-	.attr('height', mainHeight)
-	.attr('class', 'main');
+  .attr('transform', 'translate(' + margin.left + ',' + margin.top + ')')
+  .attr('width', width)
+  .attr('height', mainHeight)
+  .attr('class', 'main');
 
 mini = chart.append('g')
-	.attr('transform', 'translate(' + margin.left + ',' + (mainHeight + 60) + ')')
-	.attr('width', width)
-	.attr('height', miniHeight)
-	.attr('class', 'mini');
+  .attr('transform', 'translate(' + margin.left + ',' + (mainHeight + 60) + ')')
+  .attr('width', width)
+  .attr('height', miniHeight)
+  .attr('class', 'mini');
 
 // draw the distanceBins for the main chart
 main.append('g').selectAll('.laneLines')
-	.data(distanceBins)
-	.enter().append('line')
-	.attr('x1', 0)
-	.attr('y1', function(d,i) { return d3.round(y1(i)) + 0.5; })
-	.attr('x2', width)
-	.attr('y2', function(d,i) { return d3.round(y1(i)) + 0.5; })
-	.attr('stroke', function(d,i) { return 'lightgray' });
+  .data(distanceBins)
+  .enter().append('line')
+  .attr('x1', 0)
+  .attr('y1', function(d,i) { return d3.round(y1(i)) + 0.5; })
+  .attr('x2', width)
+  .attr('y2', function(d,i) { return d3.round(y1(i)) + 0.5; })
+  .attr('stroke', function(d,i) { return 'lightgray' });
 
 main.append('g').selectAll('.laneText')
-	.data(distanceBins)
-	.enter().append('text')
-	.text(function(d) { return d; })
-	.attr('x', -10)
-	.attr('y', function(d,i) { return y1(i + .5); })
-	.attr('dy', '0.5ex')
-	.attr('text-anchor', 'end')
-	.attr('class', 'laneText');
+  .data(distanceBins)
+  .enter().append('text')
+  .text(function(d) { return d[0]; })
+  .attr('x', -10)
+  .attr('y', function(d,i) { return y1(i + .5); })
+  .attr('dy', '0.5ex')
+  .attr('text-anchor', 'end')
+  .attr('class', 'laneText')
+  .attr('id', 'laneHover')
+  .on('mouseover',function() {
+	  $('svg #laneHover').tipsy({ 
+		gravity: 'nw', 
+		html: true, 
+		title: function() {
+		  console.log('hello!');
+		  var d = this.__data__; 
+		  return d[1];
+		  }
+		})
+	});
 
 // draw the distanceBins for the mini chart
 mini.append('g').selectAll('.laneLines')
-	.data(distanceBins)
-	.enter().append('line')
-	.attr('x1', 0)
-	.attr('y1', function(d,i) { return d3.round(y2(i)) + 0.5; })
-	.attr('x2', width)
-	.attr('y2', function(d,i) { return d3.round(y2(i)) + 0.5; })
-	.attr('stroke', function(d) { return d === '' ? 'white' : 'lightgray' });
+  .data(distanceBins)
+  .enter().append('line')
+  .attr('x1', 0)
+  .attr('y1', function(d,i) { return d3.round(y2(i)) + 0.5; })
+  .attr('x2', width)
+  .attr('y2', function(d,i) { return d3.round(y2(i)) + 0.5; })
+  .attr('stroke', function(d) { return d === '' ? 'white' : 'lightgray' });
 
 mini.append('g').selectAll('.laneText')
-	.data(distanceBins)
-	.enter().append('text')
-	.text(function(d) { return d; })
-	.attr('x', -10)
-	.attr('y', function(d,i) { return y2(i+ 0.5); })
-	.attr('dy', '0.5ex')
-	.attr('text-anchor', 'end')
-	.attr('class', 'laneText');
-
+  .data(distanceBins)
+  .enter().append('svg:text')
+  .text(function(d) { return d[0]; })
+  .attr('x', -10)
+  .attr('y', function(d,i) { return y2(i+ 0.5); })
+  .attr('dy', '0.5ex')
+  .attr('text-anchor', 'end')
+  .attr('class', 'laneText');
+  
 // draw the x axis
 xDateAxis = d3.svg.axis()
-	.scale(x)
-	.orient('top')
-	.ticks(20)
-	.tickSize(15, 0, 0);
+  .scale(x)
+  .orient('top')
+  .ticks(20)
+  .tickSize(15, 0, 0);
 
 main.append('g')
-	.attr('transform', 'translate(0,' + mainHeight + ')')
-	.attr('class', 'main axis date')
-	.call(xDateAxis);
-	
+  .attr('transform', 'translate(0,' + mainHeight + ')')
+  .attr('class', 'main axis date')
+  .call(xDateAxis);
+  
 mini.append('g')
-	.attr('transform', 'translate(0,0.5)')
-	.attr('class', 'axis month')
-	.call(xDateAxis)
-	.selectAll('text')
-		.attr('dx', 9)
-		.attr('dy', 12);
+  .attr('transform', 'translate(0,0.5)')
+  .attr('class', 'axis month')
+  .call(xDateAxis)
+  .selectAll('text')
+    .attr('dx', 9)
+    .attr('dy', 12);
 
 // draw the items
 itemRects = main.append('g')
-	.attr('clip-path', 'url(#clip)');
+  .attr('clip-path', 'url(#clip)');
 
 mini.append('g').selectAll('miniItems')
-	.data(json)
-	.enter().append('rect')
-	.attr('class', function(d) { return 'miniItem '; })
-	.attr("x",function(d,i) {return x(d.time_bin)})
-	.attr("y",function(d) {return y2(d.dist_bin+.08)})
-	.attr("width",x(2)-x(1))
-	.attr("height",y2(1)*.5)
-	.style("fill", function(d, i) {return fill(i);});
+  .data(json)
+  .enter().append('rect')
+  .attr('class', function(d) { return 'miniItem '; })
+  .attr("x",function(d,i) {return x(d.time_bin)})
+  .attr("y",function(d) {return y2(d.dist_bin+.08)})
+  .attr("width",x(2)-x(1))
+  .attr("height",y2(1)*.5)
+  .style("fill", function(d, i) {return fill(i);});
 
 // draw the selection area
 brush = d3.svg.brush()
-	.x(x)
-	.extent([min_extent_width-5, max_extent_width])
-	.on("brush", display);
+  .x(x)
+  .extent([min_extent_width-5, max_extent_width])
+  .on("brush", display);
 
 mini.append('g')
-	.attr('class', 'x brush')
-	.call(brush)
-	.selectAll('rect')
-	.attr('y', 1)
-	.attr('height', miniHeight - 1);
+  .attr('class', 'x brush')
+  .call(brush)
+  .selectAll('rect')
+  .attr('y', 1)
+  .attr('height', miniHeight - 1);
 
 mini.selectAll('rect.background').remove();
 display(x1);
 });
 
-var hover = function() {
-$('svg text').tipsy({ 
-gravity: 'w', 
-html: true, 
-title: function() {
-		var d = this.__data__; 
-		console.log(d);
-		return "d.sample_tweet_text";
-		}
-});
-}
 function display () {
 
- 	var rects, labels
- 		, minExtent = brush.extent()[0]
- 		, maxExtent = brush.extent()[1];
- 	var extentWidth = maxExtent - minExtent;
- 		if (extentWidth > max_extent_width)
- 			maxExtent = minExtent + max_extent_width;
- 		if (extentWidth < min_extent_width)
- 			maxExtent = minExtent + min_extent_width;
- 	var visItems = jsonData.filter(function (d) {return d.time_bin < maxExtent && d.time_bin > minExtent});
- 	mini.select('.brush').call(brush.extent([minExtent, maxExtent]));	
+  var rects, labels
+    , minExtent = brush.extent()[0]
+    , maxExtent = brush.extent()[1];
+  var extentWidth = maxExtent - minExtent;
+    if (extentWidth > max_extent_width)
+      maxExtent = minExtent + max_extent_width;
+    if (extentWidth < min_extent_width)
+      maxExtent = minExtent + min_extent_width;
+  var visItems = jsonData.filter(function (d) {return d.time_bin < maxExtent && d.time_bin > minExtent});
+  mini.select('.brush').call(brush.extent([minExtent, maxExtent])); 
 
-	x1.domain([minExtent, maxExtent]);
-	
-	if ((maxExtent - minExtent) > 1468800000) {
-		xDateAxis.ticks(d3.time.mondays, 1).tickFormat(d3.time.format('%a %d'))
-	}
-	else if ((maxExtent - minExtent) > 172800000) {
-		xDateAxis.ticks(d3.time.days, 1).tickFormat(d3.time.format('%a %d'))
-	}
-	else {
-		xDateAxis.ticks(d3.time.hours, 4).tickFormat(d3.time.format('%I %p'))
-	}
+  x1.domain([minExtent, maxExtent]);
+  
+  if ((maxExtent - minExtent) > 1468800000) {
+    xDateAxis.ticks(d3.time.mondays, 1).tickFormat(d3.time.format('%a %d'))
+  }
+  else if ((maxExtent - minExtent) > 172800000) {
+    xDateAxis.ticks(d3.time.days, 1).tickFormat(d3.time.format('%a %d'))
+  }
+  else {
+    xDateAxis.ticks(d3.time.hours, 4).tickFormat(d3.time.format('%I %p'))
+  }
 
-	// update the axis
+  // update the axis
 
-	main.select('.main.axis.date').call(xDateAxis)
-		.selectAll('text')
-			.attr('dx', 5)
-			.attr('dy', 12);
+  main.select('.main.axis.date').call(xDateAxis)
+    .selectAll('text')
+      .attr('dx', 5)
+      .attr('dy', 12);
 
-	// upate the item rects
-	rects = itemRects.selectAll('rect')
-		.data(visItems, function (d,i) { return i; })
-		.attr('x', function(d) { return x1(d.time_bin)-30; })
-		.attr('y', function(d) { return y1(d.dist_bin) + .1 * y1(1) + 0.5; })
-		.attr('width', function(d) { return x(d.word.length*5) })
-		.style("fill", function(d, i) {return fill(i*2.2);});	
+  // upate the item rects
+  rects = itemRects.selectAll('rect')
+    .data(visItems, function (d,i) { return i; })
+    .attr('x', function(d) { return x1(d.time_bin)-30; })
+    .attr('y', function(d) { return y1(d.dist_bin) + .1 * y1(1) + 0.5; })
+    .attr('width', function(d) { return x(d.word.length*5) })
+    .attr('id','hover')
+    .style("fill", function(d, i) {return fill(i*2.2);});
 
-	rects.enter().append('svg:rect')
-		.attr('x', function(d) { return x1(d.time_bin)-30; })
-		.attr('y', function(d) { return y1(d.dist_bin) + .1 * y1(1) + 0.5; })
-		.attr('width', function(d) { return x(d.word.length*5) })
-		.attr('height', function(d) { return .8 * y1(1); })
-		.attr('class', function(d) { return 'mainItem '; })
-		.style('fill', function(d,i) { 						// add more if/else to ammend objectivity rects
-				var b = Math.round(colorScale(d.objectivity));
-				return fill(i*2.2);					
-/* 				return 'rgb(15,55,' + b + ')'; */
-					});
+  rects.enter().append('svg:rect')
+    .attr('x', function(d) { return x1(d.time_bin)-30; })
+    .attr('y', function(d) { return y1(d.dist_bin) + .1 * y1(1) + 0.5; })
+    .attr('width', function(d) { return x(d.word.length*5) })
+    .attr('height', function(d) { return .8 * y1(1); })
+    .attr('class', function(d) { return 'mainItem '; })
+    .attr('id','hover')
+    .style('fill', function(d,i) {            // add more if/else to ammend objectivity rects
+        var b = Math.round(colorScale(d.objectivity));
+        return fill(i*2.2);         
+    });
+    
+  rects.exit().remove();
 
-	rects.exit().remove();
+  // update the item labels
+  labels = itemRects.selectAll('text')
+    .data(visItems, function (d) { return d.word; })
+    .attr('x', function(d) { return x1(Math.max(d.time_bin, minExtent))-30; })
+    .attr('y', function(d) { return y1(d.dist_bin) + .4 * y1(1)});
 
-	// update the item labels
-	labels = itemRects.selectAll('text')
-		.data(visItems, function (d) { return d.word; })
-		.attr('x', function(d) { return x1(Math.max(d.time_bin, minExtent))-30; })
-		.attr('y', function(d) { return y1(d.dist_bin) + .4 * y1(1)});
-	
-	labels.enter().append('svg:text')
-		.text(function (d) { return d.word; })
-		.attr('x', function(d) { return x1(Math.max(d.time_bin, minExtent))-30; })
-		.attr('y', function(d) { return y1(d.dist_bin) + .4 * y1(1) })
-		.attr('text-anchor', 'start')
-		.attr('class', 'itemLabel')
-		.style('font-family', function(d) { // add more if/else to ammend objectivity texts
-				if (d.objectivity < 0) {
-				 return 'Century Gothic';
-				}
-		})
-		.style('fill','white');
-	labels.exit().remove();
+  labels.enter().append('svg:text')
+    .text(function (d) { return d.word; })
+    .attr('x', function(d) { return x1(Math.max(d.time_bin, minExtent))-30; })
+    .attr('y', function(d) { return y1(d.dist_bin) + .4 * y1(1) })
+    .attr('text-anchor', 'start')
+    .attr('class', 'itemLabel')
+    .style('font-family', function(d) { // add more if/else to ammend objectivity texts
+        if (d.objectivity < 0) {
+         return 'Century Gothic';
+        }
+    })
+    .style('fill','white');
+  labels.exit().remove();
+ 
+  $('svg #hover').tipsy({ 
+	gravity: 'w', 
+	html: true, 
+	title: function() {
+	  var d = this.__data__; 
+	  return d.sample_tweet_text;
+	  }
+	});
+
 };
 </script>
 </body>
