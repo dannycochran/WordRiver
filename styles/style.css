@@ -1,3 +1,15 @@
+#bg {
+	position:fixed; 
+	top:0; 
+	left:0; 
+	
+	/* Preserve aspet ratio */
+	max-width:100%;
+	min-height:100%;
+	z-index:-1;
+	opacity: 0.4
+}
+
 div h1 {
 	padding: 15px 20px 20px;
 	margin-top:-5px;
@@ -15,4 +27,51 @@ div h1 {
 div img {
 	float:left;
 	margin-top: -5px;
+	
+}
+.chart {
+	shape-rendering: crispEdges;
+}
+
+.mini text {
+	font: 9px sans-serif;	
+}
+
+.main text {
+	font-family: Rockwell, "Courier New", Courier, Georgia,
+                 Times, "Times New Roman", serif;
+	font: 12px sans-serif;	
+}
+
+.month text {
+	text-anchor: start;
+}
+
+.todayLine {
+	stroke: blue;
+	stroke-width: 1.5;
+}
+
+.axis line, .axis path {
+	stroke: black;
+}
+
+.miniItem {
+	stroke-width: 6;	
+}
+
+.future {
+	stroke: gray;
+	fill: #ddd;
+}
+
+.past {
+	stroke: green;
+	fill: lightgreen;
+}
+
+.brush .extent {
+	stroke: gray;
+	fill: blue;
+	fill-opacity: .165;
 }

@@ -1,43 +1,23 @@
 <html>
 <head>
+<meta charset="utf-8">
 <title>A River of Twitter Data</title>
-<script type="text/javascript" src="lib/d3.v2.js"></script>
+<script type="text/javascript" src="lib/d3.v2.min.js"></script>
+<script type="text/javascript" src="http://code.jquery.com/jquery-1.6.2.min.js"></script>
+<script type="text/javascript" src="https://raw.github.com/jaz303/tipsy/master/src/javascripts/jquery.tipsy.js"></script>
+<script src="http://code.jquery.com/ui/1.9.1/jquery-ui.js"></script>
+
+<link rel="stylesheet" href="http://code.jquery.com/ui/1.9.1/themes/base/jquery-ui.css" />
 <link rel="stylesheet" href="styles/style.css" type="text/css" /> 
+<link rel="stylesheet" href="styles/tipsy.css" type="text/css" />  
 
 <div>
 	<h1>
 	<img src="lib/twitter-bird-white-on-blue1.png"/>
-	A River of Twitter Words
+	Activity, Hurricane Sandy
 	</h1>
+<!-- 	<img src="lib/background.jpeg" id="bg" alt=""> -->
 </div>  
-
-<style>
-.chart {
-	shape-rendering: crispEdges;
-}
-
-.mini text {
-	font: 9px sans-serif;	
-}
-
-.main text {
-	font: 12px sans-serif;	
-}
-
-.axis line, .axis path {
-	stroke: black;
-}
-
-.miniItem {
-	stroke-width: 6;	
-}
-
-.brush .extent {
-	stroke: gray;
-	fill: blue;
-	fill-opacity: .165;
-}
-</style>
 </head>
 <body>
 
@@ -186,9 +166,21 @@ mini.append('g')
 
 mini.selectAll('rect.background').remove();
 display(x1);
-})
+});
 
+var hover = function() {
+$('svg text').tipsy({ 
+gravity: 'w', 
+html: true, 
+title: function() {
+		var d = this.__data__; 
+		console.log(d);
+		return "d.sample_tweet_text";
+		}
+});
+}
 function display () {
+
  	var rects, labels
  		, minExtent = brush.extent()[0]
  		, maxExtent = brush.extent()[1];
@@ -235,7 +227,6 @@ function display () {
 		.attr('class', function(d) { return 'mainItem '; })
 		.style('fill', function(d,i) { 						// add more if/else to ammend objectivity rects
 				var b = Math.round(colorScale(d.objectivity));
-				console.log(b);
 				return fill(i*2.2);					
 /* 				return 'rgb(15,55,' + b + ')'; */
 					});
@@ -261,7 +252,7 @@ function display () {
 		})
 		.style('fill','white');
 	labels.exit().remove();
-}
+};
 </script>
 </body>
 </html>
