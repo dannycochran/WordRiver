@@ -29,14 +29,11 @@ var distanceBins = [["0-50 Miles","Southern New Jersey"],["51-110 Miles","Includ
   , max_extent_width = 10
   , min_extent_width = 5;
 
-var smiley_face_domain = [0.0, 0.00284480033716]
-	, positivity_domain = [0.0163966168908, 0.0418471720818]
+var positivity_domain = [0.0163966168908, 0.0418471720818]
 	, frequency_domain = [0, 0.1]
-	, frowny_face_domain = [0.0, 0.00307254196643]
-	, objectivity_domain = [0.923212665835, 0.965169775079]
-	, negativity_domain = [0.0180826923077, 0.0402922531428];
+	, objectivity_domain = [0.923212665835, 0.965169775079];
 
-d3.json("lib/sandyData1.json", function (json) {
+d3.json("lib/sandyData2.json", function (json) {
 
 jsonData=json;
 
@@ -65,7 +62,7 @@ colorScale1 = d3.scale.linear()
 
 wordSizeScale = d3.scale.linear()
   .domain(frequency_domain)
-  .range([10,20]);
+  .range([12,20]);
 
 extentSizeScale = d3.scale.linear()
   .domain([min_extent_width,max_extent_width])
@@ -141,7 +138,7 @@ main.append('text')
     .attr('id', 'x_label')
     .attr('text-anchor', 'end')
     .attr('x', width+70)
-    .attr('y', mainHeight)
+    .attr('y', mainHeight+5)
     .style('font-family', 'Rockwell')
     .text('hours from');
 main.append('text')
@@ -149,7 +146,7 @@ main.append('text')
     .attr('id', 'x_label')
     .attr('text-anchor', 'end')
     .attr('x', width+70)
-    .attr('y', mainHeight + 14)
+    .attr('y', mainHeight + 19)
     .style('font-family', 'Rockwell')
     .text('landfall');
 
@@ -320,7 +317,8 @@ function display () {
     .data(visItems, function (d,i) { return i; })
     .attr('x', function(d) { return x1(d.time_bin); })
     .attr('y', function(d) { return y1(d.dist_bin) + .1 * y1(1) + 0.5; })
-    .attr('width', 165); 
+    .attr('width', 165)
+    .call(updateText);
 	
   rects.enter().append('svg:rect')
     .attr('x', function(d) { return x1(d.time_bin); })
@@ -331,23 +329,27 @@ function display () {
     .style('fill', function(d) {            
         var b = Math.round(colorScale(d.positivity));
         return "rgb(25,50," + b + ")";
-    });
+    })
+    .call(updateText);
     
   rects.exit().remove();
 
   // update the item labels
+  function updateText() {
   labels = itemRects.selectAll('text')
+  	.order()
     .data(visItems, function (d) { return d.word; })
+    .text(function (d) { return d.word; })
     .attr('x', function(d) { 
-    	return Math.round(x1(d.time_bin)); 
+    	return Math.round(x1(d.time_bin+0.1)); 
    	})
     .attr('y', function(d) { return y1(d.dist_bin) + .6 * y1(1)})
     .attr('id','hover');
-
+	}
   labels.enter().append('svg:text')
     .text(function (d) { return d.word; })
     .attr('x', function(d) { 
-    	return Math.round(x1(d.time_bin)); 
+    	return Math.round(x1(d.time_bin+0.1)); 
    	})
    	.attr('y', function(d) { return y1(d.dist_bin) + .6 * y1(1) })
     .attr('text-anchor', 'start')
@@ -368,7 +370,7 @@ function display () {
     	else {return 'Rockwell'}
     })
     .style('font-size',function(d) {
-    	if (d.word.length >= 8 && wordSizeScale(d.frequency)>=16) { //sloppy, unethical way of resizing data so it doesn't go out of rectangle bounds.
+    	if (d.word.length >= 8 && wordSizeScale(d.frequency)>=16) { 
     		return 16;
     	}
     	if ((maxExtent - minExtent) <= 5) {
@@ -378,9 +380,35 @@ function display () {
     		return Math.round(wordSizeScale(d.frequency)- extentSizeScale(maxExtent-minExtent));
     	}
     })
-    .style('fill','white');
+    .style('fill','white')
+    .on('mouseup',function(d) {
+    	var selectedWord = d.word;
+    	highlightWords(selectedWord);
+    });
+
+  labels.order();
   labels.exit().remove();
-  rects.exit().remove();
+
+	function highlightWords (a) {
+	  console.log('hello world')
+	  rects = itemRects.selectAll('rect')
+	    .data(visItems, function (d,i) { return i; })
+	    .attr('x', function(d) { return x1(d.time_bin); })
+	    .attr('y', function(d) { return y1(d.dist_bin) + .1 * y1(1) + 0.5; })
+	    .attr('width', 165)
+	    .attr('class','highlighted')
+	    .style('fill',function(d) {
+	    	var b = Math.round(colorScale(d.positivity));
+	    	if (d.word == a) {
+	    		return "rgb(0," + b + ",0)";
+			}
+	    	else {
+	    		var b = Math.round(colorScale(d.positivity));
+        		return "rgb(25,50," + b + ")";
+        		}
+    	})
+	    .call(updateText);
+	}
    
   $('svg #hover').tipsy({ 
 	gravity: 'w', 
@@ -438,10 +466,11 @@ function moveBrush () {
 	  , halfExtent = (brush.extent()[1] - brush.extent()[0]) / 2
 	  , start = point - halfExtent
 	  , end = point + halfExtent;
-	console.log(point,halfExtent,start,end);
 	brush.extent([start,end]);
 	display();
 }
+
+
 
 
 </script>
