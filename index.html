@@ -17,7 +17,6 @@
   <img src="lib/twitter-bird-white-on-blue1.png"/>
   Activity, Hurricane Sandy
   </h1>
-<!--  <img src="lib/background.jpeg" id="bg" alt=""> -->
 </div>  
 </head>
 <body>
@@ -30,33 +29,48 @@ var distanceBins = [["0-50 Miles","Southern New Jersey"],["51-110 Miles","Includ
   , max_extent_width = 20
   , min_extent_width = 5;
 
-d3.json("twitterWords2.json", function (json) {
+var smiley_face_domain = [0.0, 0.00284480033716]
+	, positivity_domain = [0.0163966168908, 0.0418471720818]
+	, frequency_domain = [0, 0.1]
+	, frowny_face_domain = [0.0, 0.00307254196643]
+	, objectivity_domain = [0.923212665835, 0.965169775079]
+	, negativity_domain = [0.0180826923077, 0.0402922531428];
+
+d3.json("lib/sandyData.json", function (json) {
 
 jsonData=json;
 
-var margin = {top: 20, right: 15, bottom: 15, left: 100}
+var margin = {top: 20, right: 15, bottom: 15, left: 105}
   , width = 960 - margin.left - margin.right
   , height = 500 - margin.top - margin.bottom
   , miniHeight = distanceBins.length * 12 + 50
   , mainHeight = height - miniHeight - 50;
 
 x = d3.scale.linear()
-  .domain([0,168])
+  .domain([0,167])
   .range([0, width]);
 x1 = d3.scale.linear().range([0, width]);
-
-colorScale = d3.scale.linear()
-  .domain([-200,200])
-  .range([80,120]);
   
 var ext = d3.extent(distanceBins, function(d,i) { return i; });
 y1 = d3.scale.linear().domain([ext[0], ext[1] + 1]).range([0, mainHeight]);
 y2 = d3.scale.linear().domain([ext[0], ext[1] + 1]).range([0, miniHeight]);
 
+colorScale = d3.scale.linear()
+  .domain(positivity_domain)
+  .range([50,255]);
+    
+wordSizeScale = d3.scale.linear()
+  .clamp([true])
+  .domain(frequency_domain)
+  .range([10,24]);
+
+typeFaceScale = d3.scale.linear()
+  .domain(objectivity_domain)
+  .range([0,3]);
 
 var chart = d3.select('body')
   .append('svg:svg')
-  .attr('width', width + margin.right + margin.left)
+  .attr('width', width + margin.right + margin.left+100)
   .attr('height', height + margin.top + margin.bottom)
   .attr('class', 'chart');
 
@@ -83,32 +97,47 @@ main.append('g').selectAll('.laneLines')
   .data(distanceBins)
   .enter().append('line')
   .attr('x1', 0)
-  .attr('y1', function(d,i) { return d3.round(y1(i)) + 0.5; })
+  .attr('y1', function(d,i) { return d3.round(y1(i)) + 1; })
   .attr('x2', width)
-  .attr('y2', function(d,i) { return d3.round(y1(i)) + 0.5; })
+  .attr('y2', function(d,i) { return d3.round(y1(i)) + 1; })
   .attr('stroke', function(d,i) { return 'lightgray' });
 
 main.append('g').selectAll('.laneText')
   .data(distanceBins)
   .enter().append('text')
   .text(function(d) { return d[0]; })
-  .attr('x', -10)
+  .attr('x',0)
   .attr('y', function(d,i) { return y1(i + .5); })
   .attr('dy', '0.5ex')
   .attr('text-anchor', 'end')
   .attr('class', 'laneText')
   .attr('id', 'laneHover')
+  .style('font-family', 'Rockwell')
   .on('mouseover',function() {
 	  $('svg #laneHover').tipsy({ 
 		gravity: 'nw', 
 		html: true, 
 		title: function() {
-		  console.log('hello!');
 		  var d = this.__data__; 
 		  return d[1];
 		  }
 		})
 	});
+
+main.append('text')
+    .attr('class', 'x_label')
+    .attr('text-anchor', 'end')
+    .attr('x', width+70)
+    .attr('y', mainHeight)
+    .style('font-family', 'Rockwell')
+    .text('hours from');
+main.append('text')
+    .attr('class', 'x_label')
+    .attr('text-anchor', 'end')
+    .attr('x', width+70)
+    .attr('y', mainHeight + 14)
+    .style('font-family', 'Rockwell')
+    .text('landfall');
 
 // draw the distanceBins for the mini chart
 mini.append('g').selectAll('.laneLines')
@@ -132,20 +161,24 @@ mini.append('g').selectAll('.laneText')
   
 // draw the x axis
 xDateAxis = d3.svg.axis()
+  .scale(x1)
+  .ticks(20)
+  .tickSize(15, 0, 0);
+
+x1DateAxis = d3.svg.axis()
   .scale(x)
-  .orient('top')
   .ticks(20)
   .tickSize(15, 0, 0);
 
 main.append('g')
   .attr('transform', 'translate(0,' + mainHeight + ')')
-  .attr('class', 'main axis date')
+  .attr('class', 'main axis')
   .call(xDateAxis);
   
 mini.append('g')
   .attr('transform', 'translate(0,0.5)')
-  .attr('class', 'axis month')
-  .call(xDateAxis)
+  .attr('class', 'axis')
+  .call(x1DateAxis)
   .selectAll('text')
     .attr('dx', 9)
     .attr('dy', 12);
@@ -162,12 +195,14 @@ mini.append('g').selectAll('miniItems')
   .attr("y",function(d) {return y2(d.dist_bin+.08)})
   .attr("width",x(2)-x(1))
   .attr("height",y2(1)*.5)
-  .style("fill", function(d, i) {return fill(i);});
-
+  .style('fill', function(d) {            
+        var b = Math.round(colorScale(d.positivity));
+        return "rgb(25,50," + b + ")";
+        });
 // draw the selection area
 brush = d3.svg.brush()
   .x(x)
-  .extent([min_extent_width-5, max_extent_width])
+  .extent([min_extent_width-5, 5])
   .on("brush", display);
 
 mini.append('g')
@@ -175,6 +210,7 @@ mini.append('g')
   .call(brush)
   .selectAll('rect')
   .attr('y', 1)
+  .attr('id','brushHover')
   .attr('height', miniHeight - 1);
 
 mini.selectAll('rect.background').remove();
@@ -196,19 +232,19 @@ function display () {
 
   x1.domain([minExtent, maxExtent]);
   
-  if ((maxExtent - minExtent) > 1468800000) {
-    xDateAxis.ticks(d3.time.mondays, 1).tickFormat(d3.time.format('%a %d'))
+  if ((maxExtent - minExtent) > 5) {
+    xDateAxis.ticks(10);
   }
-  else if ((maxExtent - minExtent) > 172800000) {
-    xDateAxis.ticks(d3.time.days, 1).tickFormat(d3.time.format('%a %d'))
+  else if ((maxExtent - minExtent) > 10) {
+    xDateAxis.ticks(20);
   }
   else {
-    xDateAxis.ticks(d3.time.hours, 4).tickFormat(d3.time.format('%I %p'))
+    xDateAxis.ticks(5);
   }
 
   // update the axis
 
-  main.select('.main.axis.date').call(xDateAxis)
+  main.select('.main.axis').call(xDateAxis)
     .selectAll('text')
       .attr('dx', 5)
       .attr('dy', 12);
@@ -216,22 +252,19 @@ function display () {
   // upate the item rects
   rects = itemRects.selectAll('rect')
     .data(visItems, function (d,i) { return i; })
-    .attr('x', function(d) { return x1(d.time_bin)-30; })
+    .attr('x', function(d) { return x1(d.time_bin)-x(30); })
     .attr('y', function(d) { return y1(d.dist_bin) + .1 * y1(1) + 0.5; })
-    .attr('width', function(d) { return x(d.word.length*5) })
-    .attr('id','hover')
-    .style("fill", function(d, i) {return fill(i*2.2);});
+    .attr('width', function(d) { return x(d.word.length*5) });
 
   rects.enter().append('svg:rect')
-    .attr('x', function(d) { return x1(d.time_bin)-30; })
+    .attr('x', function(d) { return x1(d.time_bin)-x(30); })
     .attr('y', function(d) { return y1(d.dist_bin) + .1 * y1(1) + 0.5; })
     .attr('width', function(d) { return x(d.word.length*5) })
     .attr('height', function(d) { return .8 * y1(1); })
     .attr('class', function(d) { return 'mainItem '; })
-    .attr('id','hover')
-    .style('fill', function(d,i) {            // add more if/else to ammend objectivity rects
-        var b = Math.round(colorScale(d.objectivity));
-        return fill(i*2.2);         
+    .style('fill', function(d) {            
+        var b = Math.round(colorScale(d.positivity));
+        return "rgb(25,50," + b + ")";
     });
     
   rects.exit().remove();
@@ -239,19 +272,32 @@ function display () {
   // update the item labels
   labels = itemRects.selectAll('text')
     .data(visItems, function (d) { return d.word; })
-    .attr('x', function(d) { return x1(Math.max(d.time_bin, minExtent))-30; })
-    .attr('y', function(d) { return y1(d.dist_bin) + .4 * y1(1)});
+    .attr('x', function(d) { return x1(Math.max(d.time_bin, minExtent))-x(25); })
+    .attr('y', function(d) { return y1(d.dist_bin) + .6 * y1(1)})
+    .attr('id','hover');
 
   labels.enter().append('svg:text')
     .text(function (d) { return d.word; })
-    .attr('x', function(d) { return x1(Math.max(d.time_bin, minExtent))-30; })
-    .attr('y', function(d) { return y1(d.dist_bin) + .4 * y1(1) })
+    .attr('x', function(d) { return x1(Math.max(d.time_bin, minExtent))-x(25); })
+    .attr('y', function(d) { return y1(d.dist_bin) + .6 * y1(1) })
     .attr('text-anchor', 'start')
     .attr('class', 'itemLabel')
+    .attr('id','hover')
+    .style('kerning',function(d) {
+    	if (typeFaceScale(d.objectivity) < 1) {
+    		return 1;
+    	}
+    })
     .style('font-family', function(d) { // add more if/else to ammend objectivity texts
-        if (d.objectivity < 0) {
-         return 'Century Gothic';
+        if (typeFaceScale(d.objectivity) < 1) {
+         return 'Arial Black';
         }
+        else if(typeFaceScale(d.objectivity) > 2) {
+    		return 'Georgia'
+    	}
+    })
+    .style('font-size',function(d) {
+    	return wordSizeScale(d.frequency);
     })
     .style('fill','white');
   labels.exit().remove();
@@ -261,10 +307,19 @@ function display () {
 	html: true, 
 	title: function() {
 	  var d = this.__data__; 
-	  return d.sample_tweet_text;
+	  return d.sample_tweet;
 	  }
 	});
 
+  $('svg #brushHover').tipsy({ 
+	gravity: 'sw', 
+	html: true, 
+	title: function() {
+	  return "Move me to scroll through data.";
+	  }
+	})
+	
+  $('.tipsy:last').remove();	
 };
 </script>
 </body>

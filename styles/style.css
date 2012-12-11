@@ -1,24 +1,12 @@
-#bg {
-	position:fixed; 
-	top:0; 
-	left:0; 
-	
-	/* Preserve aspet ratio */
-	max-width:100%;
-	min-height:100%;
-	z-index:-1;
-	opacity: 0.4
-}
-
 div h1 {
 	padding: 15px 20px 20px;
-	margin-top:-5px;
+	margin-top:15px;
 	margin-bottom: -5px;
-	margin-left:102px;
+	margin-left:105px;
 	background: #4099FF;
 	color: white;
 	font-size: 56px;
-	max-width:803px;
+	max-width:800px;
 	text-align: right;
   	font-family: Rockwell, "Courier New", Courier, Georgia,
                  Times, "Times New Roman", serif;
@@ -26,7 +14,7 @@ div h1 {
 
 div img {
 	float:left;
-	margin-top: -5px;
+	margin-top: 5px;
 	
 }
 .chart {
@@ -56,6 +44,10 @@ div img {
 	stroke: black;
 }
 
+.axis text {
+	font-family: Rockwell;
+}
+
 .miniItem {
 	stroke-width: 6;	
 }
@@ -75,3 +67,7 @@ div img {
 	fill: blue;
 	fill-opacity: .165;
 }
+.laneText {
+	font-family: Rockwell, "Courier New", Courier, Georgia,
+                 Times, "Times New Roman", serif;
+          }
