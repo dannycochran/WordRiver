@@ -126,6 +126,7 @@ main.append('g').selectAll('.laneText')
 
 main.append('text')
     .attr('class', 'x_label')
+    .attr('id', 'x_label')
     .attr('text-anchor', 'end')
     .attr('x', width+70)
     .attr('y', mainHeight)
@@ -133,6 +134,7 @@ main.append('text')
     .text('hours from');
 main.append('text')
     .attr('class', 'x_label')
+    .attr('id', 'x_label')
     .attr('text-anchor', 'end')
     .attr('x', width+70)
     .attr('y', mainHeight + 14)
@@ -176,7 +178,7 @@ main.append('g')
   .call(xDateAxis);
   
 mini.append('g')
-  .attr('transform', 'translate(0,0.5)')
+  .attr('transform', 'translate(0,125)')
   .attr('class', 'axis')
   .call(x1DateAxis)
   .selectAll('text')
@@ -310,6 +312,14 @@ function display () {
 	  return d.sample_tweet;
 	  }
 	});
+	
+  $('svg #x_label').tipsy({ 
+	gravity: 'ne', 
+	html: true, 
+	title: function() {
+	  return "0 Hour is LandFall";
+	  }
+	})
 
   $('svg #brushHover').tipsy({ 
 	gravity: 'sw', 
