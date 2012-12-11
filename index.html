@@ -366,7 +366,7 @@ function display () {
     	else {return 'Rockwell'}
     })
     .style('font-size',function(d) {
-    	if (d.word.length >= 8 && wordSizeScale(d.frequency)>=16) { 
+    	if (d.word.length >= 6 && wordSizeScale(d.frequency)>=20) { 
     		return 16;
     	}
     	if ((maxExtent - minExtent) <= 5) {
@@ -404,6 +404,16 @@ function display () {
 	    		return "rgb(25,50," + b + ")";
 	    		}
 		})
+		rects = itemRects.selectAll('rect')
+    		.data(visItems)
+    		.transition().duration(1000)
+		    .style('fill', function(d) {
+		    	var b = Math.round(colorScale(d.positivity));
+	    	  if (d.word == a) {
+	    		return "rgb(25," + b + ",50)";
+			  }
+		})
+			.transition().delay(2000).style('fill', function(d) {var b = Math.round(colorScale(d.positivity)); return "rgb(25,50," + b + ")";});		
 	}
   $('svg #hover').tipsy({ 
 	gravity: 'w', 
