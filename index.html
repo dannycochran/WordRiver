@@ -243,7 +243,7 @@ itemRects = main.append('g')
   .attr('clip-path', 'url(#clip)');
 
 mini.append('g').selectAll('miniItems')
-  .data(json)
+  .data(jsonData)
   .enter().append('rect')
   .attr('class', function(d) { return 'miniItem '; })
   .attr("x",function(d,i) {return x(d.time_bin)})
@@ -254,7 +254,7 @@ mini.append('g').selectAll('miniItems')
         var b = Math.round(colorScale(d.positivity));
         return "rgb(25,50," + b + ")";
         });
-        
+    
 mini.append('rect')
 	.attr('pointer-events', 'painted')
 	.attr('width', width)
@@ -263,10 +263,11 @@ mini.append('rect')
 	.on('mouseup', moveBrush);
 	
 // draw the selection area
+
 brush = d3.svg.brush()
   .x(x)
-  .extent([0, 5])
-  .on("brush", display);
+  .extent([0,5])
+  .on("brush", display)
 
 mini.append('g')
   .attr('class', 'x brush')
@@ -317,8 +318,7 @@ function display () {
     .data(visItems, function (d,i) { return i; })
     .attr('x', function(d) { return x1(d.time_bin); })
     .attr('y', function(d) { return y1(d.dist_bin) + .1 * y1(1) + 0.5; })
-    .attr('width', 165)
-    .call(updateText);
+    .attr('width', 165);
 	
   rects.enter().append('svg:rect')
     .attr('x', function(d) { return x1(d.time_bin); })
@@ -329,15 +329,11 @@ function display () {
     .style('fill', function(d) {            
         var b = Math.round(colorScale(d.positivity));
         return "rgb(25,50," + b + ")";
-    })
-    .call(updateText);
-    
+    });
   rects.exit().remove();
 
   // update the item labels
-  function updateText() {
   labels = itemRects.selectAll('text')
-  	.order()
     .data(visItems, function (d) { return d.word; })
     .text(function (d) { return d.word; })
     .attr('x', function(d) { 
@@ -345,7 +341,7 @@ function display () {
    	})
     .attr('y', function(d) { return y1(d.dist_bin) + .6 * y1(1)})
     .attr('id','hover');
-	}
+
   labels.enter().append('svg:text')
     .text(function (d) { return d.word; })
     .attr('x', function(d) { 
@@ -388,28 +384,27 @@ function display () {
 
   labels.order();
   labels.exit().remove();
-
+  
 	function highlightWords (a) {
-	  console.log('hello world')
-	  rects = itemRects.selectAll('rect')
-	    .data(visItems, function (d,i) { return i; })
-	    .attr('x', function(d) { return x1(d.time_bin); })
-	    .attr('y', function(d) { return y1(d.dist_bin) + .1 * y1(1) + 0.5; })
-	    .attr('width', 165)
-	    .attr('class','highlighted')
-	    .style('fill',function(d) {
-	    	var b = Math.round(colorScale(d.positivity));
-	    	if (d.word == a) {
-	    		return "rgb(0," + b + ",0)";
+		mini.selectAll('miniItems')
+		  .data(jsonData)
+		  .enter().append('rect')
+		  .attr('class', function(d) { return 'miniItem '; })
+		  .attr("x",function(d,i) {return x(d.time_bin)})
+		  .attr("y",function(d) {return y2(d.dist_bin+.08)})
+		  .attr("width",x(2)-x(1))
+		  .attr("height",y2(1)*.5)
+		  .style('fill', function(jsonData) {
+		    	var b = Math.round(colorScale(jsonData.positivity));
+	    	if (jsonData.word == a) {
+	    		return "rgb(0,255,0)";
 			}
 	    	else {
-	    		var b = Math.round(colorScale(d.positivity));
-        		return "rgb(25,50," + b + ")";
-        		}
-    	})
-	    .call(updateText);
+	    		var b = Math.round(colorScale(jsonData.positivity));
+	    		return "rgb(25,50," + b + ")";
+	    		}
+		})
 	}
-   
   $('svg #hover').tipsy({ 
 	gravity: 'w', 
 	html: true, 
@@ -453,7 +448,7 @@ function display () {
 	gravity: 'sw', 
 	html: true, 
 	title: function() {
-	  return "Move me to scroll through data.";
+	  return "Drag or expand me to scroll through data.";
 	  }
 	})
 	
