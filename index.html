@@ -26,7 +26,7 @@
 var distanceBins = [["0-50 Miles","Southern New Jersey"],["51-110 Miles","Includes Manhattan"],["111-200 Miles","Includes Washington D.C."],["201-500 Miles","Entire East Coast"],["501-1000 Miles","Midwest Region (including Chicago)"],["1000-3000 Miles","Continental U.S."],["3000+ Miles","Rest of the World excluding U.S."]]
   , fill = d3.scale.category20()
   , jsonData
-  , max_extent_width = 5
+  , max_extent_width = 10
   , min_extent_width = 5;
 
 var smiley_face_domain = [0.0, 0.00284480033716]
@@ -48,8 +48,8 @@ var margin = {top: 20, right: 15, bottom: 15, left: 105}
 
 x = d3.scale.linear()
   .domain([0,164])
-  .range([0, width]);
-x1 = d3.scale.linear().range([0, width]);
+  .range([1, width]);
+x1 = d3.scale.linear().range([1, width]);
   
 var ext = d3.extent(distanceBins, function(d,i) { return i; });
 y1 = d3.scale.linear().domain([ext[0], ext[1] + 1]).range([0, mainHeight]);
@@ -257,10 +257,18 @@ mini.append('g').selectAll('miniItems')
         var b = Math.round(colorScale(d.positivity));
         return "rgb(25,50," + b + ")";
         });
+        
+mini.append('rect')
+	.attr('pointer-events', 'painted')
+	.attr('width', width)
+	.attr('height', miniHeight)
+	.attr('visibility', 'hidden')
+	.on('mouseup', moveBrush);
+	
 // draw the selection area
 brush = d3.svg.brush()
   .x(x)
-  .extent([min_extent_width-5, 5])
+  .extent([0, 5])
   .on("brush", display);
 
 mini.append('g')
@@ -285,7 +293,7 @@ function display () {
       maxExtent = minExtent + max_extent_width;
     if (extentWidth < min_extent_width)
       maxExtent = minExtent + min_extent_width;
-  var visItems = jsonData.filter(function (d) {return d.time_bin < maxExtent && d.time_bin > minExtent});
+  var visItems = jsonData.filter(function (d) {return d.time_bin <= maxExtent && d.time_bin >= minExtent});
   mini.select('.brush').call(brush.extent([minExtent, maxExtent])); 
 
   x1.domain([minExtent, maxExtent]);
@@ -310,28 +318,15 @@ function display () {
   // upate the item rects
   rects = itemRects.selectAll('rect')
     .data(visItems, function (d,i) { return i; })
-    .attr('x', function(d) { return x1(d.time_bin-0.975); })
+    .attr('x', function(d) { return x1(d.time_bin); })
     .attr('y', function(d) { return y1(d.dist_bin) + .1 * y1(1) + 0.5; })
-    .attr('width', function(d) { 
-      if ((maxExtent - minExtent) <= 5) {
-    	return x(rectSizeScale(d.word.length)) 
-    	}
-      else if ((maxExtent - minExtent) >= 5) {
-		return x(rectSizeScale(d.word.length*(maxExtent-minExtent-5)));
-		}
-	})  
+    .attr('width', 165); 
 	
   rects.enter().append('svg:rect')
-    .attr('x', function(d) { return x1(d.time_bin-0.975); })
+    .attr('x', function(d) { return x1(d.time_bin); })
     .attr('y', function(d) { return y1(d.dist_bin) + .1 * y1(1) + 0.5; })
-    .attr('width', function(d) { 
-      if ((maxExtent - minExtent) <= 5) {
-    	return x(rectSizeScale(d.word.length)) 
-    	}
-      else {
-		return x(rectSizeScale(d.word.length*(maxExtent-minExtent-5)));
-		}
-	})    
+    .attr('width', 165)
+	.attr('class','borderMe')    
     .attr('height', function(d) { return .8 * y1(1); })
     .style('fill', function(d) {            
         var b = Math.round(colorScale(d.positivity));
@@ -344,12 +339,7 @@ function display () {
   labels = itemRects.selectAll('text')
     .data(visItems, function (d) { return d.word; })
     .attr('x', function(d) { 
-    	if ((maxExtent - minExtent) <= 5) {
-   			return Math.round(x1(d.time_bin-0.95)); 
-   			}
-    	else {
-   			return Math.round(x1(d.time_bin-1)-x(maxExtent-minExtent-12)); 
-   		}
+    	return Math.round(x1(d.time_bin)); 
    	})
     .attr('y', function(d) { return y1(d.dist_bin) + .6 * y1(1)})
     .attr('id','hover');
@@ -357,12 +347,7 @@ function display () {
   labels.enter().append('svg:text')
     .text(function (d) { return d.word; })
     .attr('x', function(d) { 
-    	if ((maxExtent - minExtent) <= 5) {
-   			return Math.round(x1(d.time_bin-0.95)); 
-   			}
-    	else {
-   			return Math.round(x1(d.time_bin)-x(maxExtent-minExtent-12)); 
-   		}
+    	return Math.round(x1(d.time_bin)); 
    	})
    	.attr('y', function(d) { return y1(d.dist_bin) + .6 * y1(1) })
     .attr('text-anchor', 'start')
@@ -446,6 +431,19 @@ function display () {
 	
   $('.tipsy:last').remove();	
 };
+
+function moveBrush () {
+	var origin = d3.mouse(this)
+	  , point = x.invert(origin[0])
+	  , halfExtent = (brush.extent()[1] - brush.extent()[0]) / 2
+	  , start = point - halfExtent
+	  , end = point + halfExtent;
+	console.log(point,halfExtent,start,end);
+	brush.extent([start,end]);
+	display();
+}
+
+
 </script>
 </body>
 </html>

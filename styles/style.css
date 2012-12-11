@@ -71,3 +71,9 @@ div img {
 	font-family: Rockwell, "Courier New", Courier, Georgia,
                  Times, "Times New Roman", serif;
           }
+
+.borderMe 
+{
+border-style:solid;
+border-right:thick double #ff0000;
+}
