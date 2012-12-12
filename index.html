@@ -3,37 +3,50 @@
 <head>
   <meta charset="utf-8">
 <title>A River of Twitter Data</title>
-<script src="lib/d3.v2.min.js"></script>
-<script type="text/javascript" src="http://code.jquery.com/jquery-1.6.2.min.js"></script>
-<script type="text/javascript" src="lib/jquery.tipsy.js"></script>          
-<script type="text/javascript" src="http://code.jquery.com/ui/1.9.1/jquery-ui.js"></script>
+<script src="js/d3.v2.js"></script>
+<script type="text/javascript" src="js/jquery-1.6.2.min.js"></script>
+<script type="text/javascript" src="js/jquery.tipsy.js"></script>          
+<script type="text/javascript" src="js/jquery-ui.js"></script>
 
 <link rel="stylesheet" href="styles/style.css" type="text/css" /> 
 <link rel="stylesheet" href="styles/tipsy.css" type="text/css" />  
 <link rel="stylesheet" href="http://code.jquery.com/ui/1.9.1/themes/base/jquery-ui.css" />
 
-<div>
-  <h1>
-  <img src="lib/twitter-bird-white-on-blue1.png"/>
-  Activity, Hurricane Sandy
-  </h1>
-</div>  
 </head>
+
 <body>
+
+<div>
+  	<h1>
+  	<img src="data/twitter-bird-white-on-blue1.png"/>
+  	Activity, Hurricane Sandy
+  	</h1>
+<!-- play & pause buttons, hosted externally because Stanford doesn't seem to like these files on cgi-bin  -->
+	<p><img class='playbutton' type="button" value="Play" id="play" src="http://f.cl.ly/items/3O2M2V2w2a0j0s1I2I32/Play.png"/></p>
+	<p><img class='playbutton' type="button" value="Stop" id="stop" style="display:none" src="http://f.cl.ly/items/3v452T2g0i0i1V1C113O/pause.png"/></p>
+</div>
 
 <script type="text/javascript">
 
-var distanceBins = [["0-50 Miles","Southern New Jersey"],["51-110 Miles","Includes Manhattan"],["111-200 Miles","Includes Washington D.C."],["201-500 Miles","Entire East Coast"],["501-1000 Miles","Midwest Region (including Chicago)"],["1000-3000 Miles","Continental U.S."],["3000+ Miles","Rest of the World excluding U.S."]]
-  , fill = d3.scale.category20()
-  , jsonData
-  , max_extent_width = 10
+// distance bins 
+var distanceBins = [["0-50 Miles","Southern New Jersey"],["51-110 Miles","Includes Manhattan"],["111-200 Miles","Includes Washington D.C."],["201-500 Miles","Entire East Coast"],["501-1000 Miles","Midwest Region (including Chicago)"],["1000-3000 Miles","Continental U.S."],["3000+ Miles","Rest of the World excluding U.S."]];
+// for universal access, jsonData contains the whole json file
+var jsonData;
+
+// these control the user's potential selection range for brushing, too large a difference yields a scrunched graph
+var max_extent_width = 10
   , min_extent_width = 5;
+  
+// min/max values of d.positivity, d.frequency, and d.objectivity
+var positivityDomain = [0.0163966168908, 0.0418471720818]
+	, frequencyDomain = [0.00647305977464, 0.01]
+	, objectivityDomain = [0.923212665835, 0.965169775079];
+	
+// vars for decreasing blueness (by increasing RG values) of heat maps
+var redOffset = 40;
+var greenOffset = 40;
 
-var positivity_domain = [0.0163966168908, 0.0418471720818]
-	, frequency_domain = [0, 0.1]
-	, objectivity_domain = [0.923212665835, 0.965169775079];
-
-d3.json("lib/sandyData2.json", function (json) {
+d3.json("data/sandyv5.json", function (json) {
 
 jsonData=json;
 
@@ -52,34 +65,29 @@ var ext = d3.extent(distanceBins, function(d,i) { return i; });
 y1 = d3.scale.linear().domain([ext[0], ext[1] + 1]).range([0, mainHeight]);
 y2 = d3.scale.linear().domain([ext[0], ext[1] + 1]).range([0, miniHeight]);
 
-colorScale = d3.scale.linear()
-  .domain(positivity_domain)
-  .range([50,255]);
-    
-colorScale1 = d3.scale.linear()
-  .domain(positivity_domain)
-  .range([1,8]);
+//heat maps for main and mini graph (sets blue (RG) B value)
+colorScale = d3.scale.quantize()
+  .domain(positivityDomain)
+  .range([0,75,150,225]); // color will be arranged into four quartiles with quantize
 
-wordSizeScale = d3.scale.linear()
-  .domain(frequency_domain)
-  .range([12,20]);
+// font size scale from 12 to 20
+wordSizeScale = d3.scale.quantize()
+  .domain(frequencyDomain)
+  .range([12,16,18,20]);
 
+// resizes fonts if user expands brush selection
 extentSizeScale = d3.scale.linear()
   .domain([min_extent_width,max_extent_width])
   .range([2,4]);
-
-rectSizeScale = d3.scale.linear()
-  .clamp([true])
-  .domain([0,15])
-  .range([35,35]);
-
+  
+// determines if bins are emotional enough to be italic 
 typeFaceScale = d3.scale.linear()
-  .domain(objectivity_domain)
+  .domain(objectivityDomain)
   .range([0,3]);
 
 var chart = d3.select('body')
   .append('svg:svg')
-  .attr('width', width + margin.right + margin.left+100)
+  .attr('width', width + margin.right + margin.left+105)
   .attr('height', height + margin.top + margin.bottom)
   .attr('class', 'chart');
 
@@ -132,13 +140,8 @@ main.append('g').selectAll('.laneText')
 		  }
 		})
 	});
-
-main.append('rect')
-    .attr('x', width+5)
-    .attr('y', mainHeight - 210)
-    .attr('width',200)
-    .attr('height',120)
-    .style('fill','#F0FFFF')
+	
+// x-axis label
 main.append('text')
     .attr('class', 'x_label')
     .attr('id', 'x_label')
@@ -156,55 +159,67 @@ main.append('text')
     .style('font-family', 'Rockwell')
     .text('landfall');
 
+// legend  
 main.append('rect')
-    .attr('x', width+10)
-    .attr('y', mainHeight - 150)
-    .attr('width',40)
+    .attr('x', width+5)
+    .attr('y', 0)
+    .attr('width',110)
+    .attr('height',120)
+    .style('fill','#F0FFFF');
+main.append('rect')
+    .attr('x', width+20)
+    .attr('y', 30)
+    .attr('rx',5)
+    .attr('ry',5)
+    .attr('width',70)
+    .attr('height',20)
+    .style('fill','#4099FF');
+main.append('rect')
+    .attr('x', width+20)
+    .attr('y', 60)
+    .attr('rx',5)
+    .attr('ry',5)
+    .attr('width',70)
+    .attr('height',20)
+    .style('fill','#4099FF');
+main.append('rect')
+    .attr('x', width+20)
+    .attr('y', 90)
+    .attr('width',70)
     .attr('height',20)
     .style('fill','#4099FF')
+    .attr('rx',5)
+    .attr('ry',5);
 main.append('svg:text')
     .attr('id', 'color')
-    .attr('x', width+13)
-    .attr('y', mainHeight - 136)
+    .attr('x', width+37)
+    .attr('y', 45)
     .text('Color')
     .style('font-family', 'Rockwell')
     .style('fill','white')
     .style('font-size',12);
-main.append('rect')
-    .attr('x', width+10)
-    .attr('y', mainHeight - 180)
-    .attr('width',65)
-    .attr('height',20)
-    .style('fill','#4099FF')
 main.append('svg:text')
     .attr('id', 'typeFace')
-    .attr('x', width+13)
-    .attr('y', mainHeight - 166)
+    .attr('x', width+27)
+    .attr('y', 75)
     .text('Font Type')
     .style('font-family', 'Rockwell')
     .style('fill','white')
     .style('font-size',12);
-main.append('rect')
-    .attr('x', width+10)
-    .attr('y', mainHeight - 120)
-    .attr('width',100)
-    .attr('height',20)
-    .style('fill','#4099FF')
 main.append('svg:text')
     .attr('id', 'frequency')
-    .attr('x', width+13)
-    .attr('y', mainHeight - 106)
-    .text('Word Frequency')
+    .attr('x', width+27)
+    .attr('y', 105)
+    .text('Font Size')
     .style('font-family', 'Rockwell')
     .style('fill','white')
     .style('font-size',12);
 main.append('svg:text')
-    .attr('x', width+13)
-    .attr('y', mainHeight - 190)
+    .attr('x', width+15)
+    .attr('y', 15)
     .text('Legend (hover)')
     .style('font-family', 'Rockwell')
     .style('font-size',12);
-    
 
 // draw the distanceBins for the mini chart
 mini.append('g').selectAll('.laneLines')
@@ -226,7 +241,7 @@ mini.append('g').selectAll('.laneText')
   .attr('text-anchor', 'end')
   .attr('class', 'laneText');
   
-// draw the x axis
+// draw the x-axis
 xDateAxis = d3.svg.axis()
   .scale(x1)
   .ticks(20)
@@ -250,7 +265,7 @@ mini.append('g')
     .attr('dx', 9)
     .attr('dy', 12);
 
-// draw the items
+// declare the main rectangles to be amended in display(), and place the mini graph now
 itemRects = main.append('g')
   .attr('clip-path', 'url(#clip)');
 
@@ -263,8 +278,8 @@ mini.append('g').selectAll('miniItems')
   .attr("width",x(2)-x(1))
   .attr("height",y2(1)*.5)
   .style('fill', function(d) {            
-        var b = Math.round(colorScale(d.positivity));
-        return "rgb(25,50," + b + ")";
+        var b = 255-(Math.round(colorScale(d.positivity)));
+        return "rgb(" + redOffset + "," + greenOffset + "," + b + ")";
         });
     
 mini.append('rect')
@@ -303,16 +318,13 @@ function display () {
       maxExtent = minExtent + max_extent_width;
     if (extentWidth < min_extent_width)
       maxExtent = minExtent + min_extent_width;
-  var visItems = jsonData.filter(function (d) {return d.time_bin <= maxExtent && d.time_bin >= minExtent});
+  var visItems = jsonData.filter(function (d) {return d.time_bin <= maxExtent+1 && d.time_bin >= minExtent-1});
   mini.select('.brush').call(brush.extent([minExtent, maxExtent])); 
 
   x1.domain([minExtent, maxExtent]);
   
-  if ((maxExtent - minExtent) > 5) {
+  if ((maxExtent - minExtent) >= 10) {
     xDateAxis.ticks(10);
-  }
-  else if ((maxExtent - minExtent) > 10) {
-    xDateAxis.ticks(20);
   }
   else {
     xDateAxis.ticks(5);
@@ -327,7 +339,7 @@ function display () {
 
   // upate the item rects
   rects = itemRects.selectAll('rect')
-    .data(visItems, function (d,i) { return i; })
+    .data(jsonData, function (d,i) { return i; })
     .attr('x', function(d) { return x1(d.time_bin); })
     .attr('y', function(d) { return y1(d.dist_bin) + .1 * y1(1) + 0.5; })
     .attr('width', 165);
@@ -339,8 +351,8 @@ function display () {
 	.attr('class','borderMe')    
     .attr('height', function(d) { return .8 * y1(1); })
     .style('fill', function(d) {            
-        var b = Math.round(colorScale(d.positivity));
-        return "rgb(25,50," + b + ")";
+        var b = 255-(Math.round(colorScale(d.positivity)));
+        return "rgb(" + redOffset + "," + greenOffset + "," + b + ")";
     });
   rects.exit().remove();
 
@@ -352,7 +364,16 @@ function display () {
     	return Math.round(x1(d.time_bin+0.1)); 
    	})
     .attr('y', function(d) { return y1(d.dist_bin) + .6 * y1(1)})
-    .attr('id','hover');
+    .attr('id','hover')
+    .style('font-size',function(d) {
+    	console.log(Math.round(wordSizeScale(d.frequency)));
+     	if ((maxExtent - minExtent) > 7) {
+    		return Math.round(wordSizeScale(d.frequency)- extentSizeScale(maxExtent-minExtent));
+    		}
+    	else {
+    		return Math.round(wordSizeScale(d.frequency))
+    	}
+    });
 
   labels.enter().append('svg:text')
     .text(function (d) { return d.word; })
@@ -363,35 +384,19 @@ function display () {
     .attr('text-anchor', 'start')
     .attr('class', 'itemLabel')
     .attr('id','hover')
-    .style('kerning',function(d) {
-    	if (typeFaceScale(d.objectivity) < 1) {
-    		return 0.5;
-    	}
-    })
-    .style('font-family', function(d) { // add more if/else to ammend objectivity texts
-        if (typeFaceScale(d.objectivity) < 1) {
+    .style('font-size',function(d) {
+    		return Math.round(wordSizeScale(d.frequency))
+    		})
+    .style('font-family', function(d) { 
+        if (typeFaceScale(d.objectivity) < 2) { // return arial for both normal and emotional bins
          return 'Arial';
         }
-        else if(typeFaceScale(d.objectivity) > 2) {
-    		return 'Arial Black'
-    	}
-    	else {return 'Arial'}
+        else {return 'Arial Black'}
     })
-    .style('font-style', function(d) { // add more if/else to ammend objectivity texts
+    .style('font-style', function(d) { // italicize if emotional
         if (typeFaceScale(d.objectivity) < 1) {
          return 'italic';
         }
-    })
-    .style('font-size',function(d) {
-    	if (d.word.length >= 6 && wordSizeScale(d.frequency)>=20) { 
-    		return 16;
-    	}
-    	if ((maxExtent - minExtent) <= 5) {
-    		return Math.round(wordSizeScale(d.frequency))
-    	}
-    	else {
-    		return Math.round(wordSizeScale(d.frequency)- extentSizeScale(maxExtent-minExtent));
-    	}
     })
     .style('fill','white')
     .on('mouseup',function(d) {
@@ -414,24 +419,29 @@ function display () {
 		  .style('fill', function(jsonData) {
 		    	var b = Math.round(colorScale(jsonData.positivity));
 	    	if (jsonData.word == a) {
-	    		return "rgb(0,255,0)";
+	    		return "rgb(0,200,0)";
 			}
 	    	else {
-	    		var b = Math.round(colorScale(jsonData.positivity));
-	    		return "rgb(25,50," + b + ")";
+	    		var b = 255-(Math.round(colorScale(jsonData.positivity)));
+        			return "rgb(" + redOffset + "," + greenOffset + "," + b + ")";
 	    		}
 		})
 		rects = itemRects.selectAll('rect')
-    		.data(visItems)
+    		.data(jsonData)
     		.transition().duration(1000)
 		    .style('fill', function(d) {
-		    	var b = Math.round(colorScale(d.positivity));
+		    	var b = 255-(Math.round(colorScale(d.positivity)));
 	    	  if (d.word == a) {
-	    		return "rgb(25," + b + ",50)";
+        		return "rgb(" + redOffset + ",200," + greenOffset + ")";
 			  }
 		})
-			.transition().delay(2000).style('fill', function(d) {var b = Math.round(colorScale(d.positivity)); return "rgb(25,50," + b + ")";});		
-	}
+			.transition().delay(2000).style('fill', function(d) {
+				var b = 255-(Math.round(colorScale(d.positivity))); 
+        		return "rgb(" + redOffset + "," + greenOffset + "," + b + ")";
+				});		
+		}
+	
+// tipsy hover states by element ID 
   $('svg #hover').tipsy({ 
 	gravity: 'w', 
 	html: true, 
@@ -460,7 +470,7 @@ function display () {
 	gravity: 'ne', 
 	html: true, 
 	title: function() {
-	  return "Positivity: Darker shades correlate to higher positivity (NLTK sentiment ratings).";
+	  return "Lighter shades correlate to higher positivity. (Sentiwordnet sentiment score)";
 	  }
 	})
   $('svg #frequency').tipsy({ 
@@ -492,8 +502,48 @@ function moveBrush () {
 	display();
 }
 
+// Set up auto play parameters
 
+var timer = null,
+		duration = 100,
+		extentIncrement = 0.05,
+		extentMax = 164;
 
+// Define behavior of the Play button
+$('#play').click(function() {
+	var extent = brush.extent();
+	if (extent[1] >= extentMax) {
+		extent[1] -= extent[0];
+		extent[0] = 0;
+		brush.extent(extent);
+	}
+	display();
+if (timer) {
+	clearInterval(timer);
+}
+timer = setInterval(function() {
+	var extent = brush.extent();
+  if (extent[1] <= extentMax) {
+      extent[0] += extentIncrement;
+      extent[1] += extentIncrement;
+      display();
+      brush.extent(extent);
+  }
+  else {
+      $('#stop').click();
+  }
+}, duration);
+$(this).hide();
+$('#stop').show();
+});
+
+$('#stop').click(function() {
+	if (timer) {
+	clearInterval(timer);
+}
+$(this).hide();
+$('#play').show();
+});
 
 </script>
 </body>
