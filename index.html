@@ -133,6 +133,12 @@ main.append('g').selectAll('.laneText')
 		})
 	});
 
+main.append('rect')
+    .attr('x', width+5)
+    .attr('y', mainHeight - 210)
+    .attr('width',200)
+    .attr('height',120)
+    .style('fill','#F0FFFF')
 main.append('text')
     .attr('class', 'x_label')
     .attr('id', 'x_label')
@@ -191,6 +197,12 @@ main.append('svg:text')
     .text('Word Frequency')
     .style('font-family', 'Rockwell')
     .style('fill','white')
+    .style('font-size',12);
+main.append('svg:text')
+    .attr('x', width+13)
+    .attr('y', mainHeight - 190)
+    .text('Legend (hover)')
+    .style('font-family', 'Rockwell')
     .style('font-size',12);
     
 
@@ -358,12 +370,17 @@ function display () {
     })
     .style('font-family', function(d) { // add more if/else to ammend objectivity texts
         if (typeFaceScale(d.objectivity) < 1) {
-         return 'Impact';
+         return 'Arial';
         }
         else if(typeFaceScale(d.objectivity) > 2) {
-    		return 'Times New Roman'
+    		return 'Arial Black'
     	}
-    	else {return 'Rockwell'}
+    	else {return 'Arial'}
+    })
+    .style('font-style', function(d) { // add more if/else to ammend objectivity texts
+        if (typeFaceScale(d.objectivity) < 1) {
+         return 'italic';
+        }
     })
     .style('font-size',function(d) {
     	if (d.word.length >= 6 && wordSizeScale(d.frequency)>=20) { 
@@ -436,7 +453,7 @@ function display () {
 	gravity: 'ne', 
 	html: true, 
 	title: function() {
-	  return "<span style='font-family: Impact'>Impact</span>" + " is highly emotional," + "<br>" + "<span style='font-family: Rockwell'>Rockwell</span>" + " is a normal level of emotion." + "<br>" + "<span style='font-family: Times New Roman; font-weight:bold'>Times New Roman</span>" + " is removed of emotion.";
+	  return "<span style='font-family: Arial; font-style: italic'>Italic</span>" + " is highly emotional," + "<br>" + "<span style='font-family: Arial'>No styling</span>" + " is a normal level of emotion." + "<br>" + "<span style='font-family: Arial Black; font-weight:bold'>Bold</span>" + " is removed of emotion.";
 	  }
 	})
   $('svg #color').tipsy({ 
