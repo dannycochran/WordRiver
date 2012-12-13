@@ -30,25 +30,35 @@
 
 // distance bins 
 var distanceBins = [["0-50 Miles","Southern New Jersey"],["51-110 Miles","Includes Manhattan"],["111-200 Miles","Includes Washington D.C."],["201-500 Miles","Entire East Coast"],["501-1000 Miles","Midwest Region (including Chicago)"],["1000-3000 Miles","Continental U.S."],["3000+ Miles","Rest of the World excluding U.S."]];
-// for universal access, jsonData contains the whole json file
+// for universal access, switchData contains the whole json file
 var jsonData;
+var jsonDataRT;
+var jsonDataFilter;
+var jsonDataRTFilter;
+var switchData;
+var checkData = 0;
 
 // these control the user's potential selection range for brushing, too large a difference yields a scrunched graph
 var max_extent_width = 10
   , min_extent_width = 5;
   
-// min/max values of d.positivity, d.frequency, and d.objectivity
+// min/max values of d.positivity, d.freqBin, and d.objectivity
 var positivityDomain = [0.0163966168908, 0.0418471720818]
-	, frequencyDomain = [0.00647305977464, 0.1]
+	, frequencyDomain = [1,4]
 	, objectivityDomain = [0.923212665835, 0.965169775079];
 	
 // vars for decreasing blueness (by increasing RG values) of heat maps
 var redOffset = 40;
 var greenOffset = 40;
 
-d3.json("data/sandyv5.json", function (json) {
+d3.json("data/sandyv5All.json", function (json) {
 
-jsonData=json;
+jsonData = json;
+jsonDataRT = json;
+switchData = json;
+jsonDataFilter = switchData.filter(function(d) {return d.isRT == 0});
+jsonDataRTFilter = switchData.filter(function(d) {return d.isRT == 1});
+switchData = jsonDataFilter;
 
 var margin = {top: 20, right: 15, bottom: 15, left: 105}
   , width = 960 - margin.left - margin.right
@@ -73,7 +83,7 @@ colorScale = d3.scale.quantize()
 // font size scale from 12 to 20
 wordSizeScale = d3.scale.quantize()
   .domain(frequencyDomain)
-  .range([12,16,18,20]);
+  .range([12,14,16,18]);
 
 // resizes fonts if user expands brush selection
 extentSizeScale = d3.scale.linear()
@@ -165,7 +175,8 @@ main.append('rect')
     .attr('y', 0)
     .attr('width',110)
     .attr('height',120)
-    .style('fill','#F0FFFF');
+    .style('fill','none')
+    .style('stroke','#4099FF');
 main.append('rect')
     .attr('x', width+20)
     .attr('y', 30)
@@ -220,6 +231,23 @@ main.append('svg:text')
     .text('Legend (hover)')
     .style('font-family', 'Rockwell')
     .style('font-size',12);
+main.append('rect')
+	.attr('class','button')
+    .attr('x', width+10)
+    .attr('y', 148)
+    .attr('width',105)
+    .attr('height',20)
+    .style('fill','#4099FF')
+    .attr('rx',5)
+    .attr('ry',5);
+main.append('svg:text')
+    .attr('x', width+17)
+    .attr('y', 162)
+    .text('Cycle Retweets')
+    .style('font-family', 'Rockwell')
+    .style('fill','white')
+    .style('font-size',12)
+    .on('mouseup', switchAllData);
 
 // draw the distanceBins for the mini chart
 mini.append('g').selectAll('.laneLines')
@@ -268,9 +296,10 @@ mini.append('g')
 // declare the main rectangles to be amended in display(), and place the mini graph now
 itemRects = main.append('g')
   .attr('clip-path', 'url(#clip)');
+  
 
 mini.append('g').selectAll('miniItems')
-  .data(jsonData)
+  .data(switchData)
   .enter().append('rect')
   .attr('class', function(d) { return 'miniItem '; })
   .attr("x",function(d,i) {return x(d.time_bin)})
@@ -306,7 +335,17 @@ mini.append('g')
 
 mini.selectAll('rect.background').remove();
 display();
+
 });
+
+function switchAllData() {
+	if (checkData == 0) {
+		checkData = 1;
+		switchData = jsonDataRTFilter;
+		}
+	else {checkData = 0; switchData = jsonDataFilter;}
+	display();
+}
 
 function display () {
 
@@ -318,7 +357,8 @@ function display () {
       maxExtent = minExtent + max_extent_width;
     if (extentWidth < min_extent_width)
       maxExtent = minExtent + min_extent_width;
-  var visItems = jsonData.filter(function (d) {return d.time_bin <= maxExtent+1 && d.time_bin >= minExtent-1});
+  var visItems = switchData.filter(function (d) {return d.time_bin <= maxExtent+1 && d.time_bin >= minExtent-1});
+	
   mini.select('.brush').call(brush.extent([minExtent, maxExtent])); 
 
   x1.domain([minExtent, maxExtent]);
@@ -339,7 +379,7 @@ function display () {
 
   // upate the item rects
   rects = itemRects.selectAll('rect')
-    .data(jsonData, function (d,i) { return i; })
+    .data(switchData, function (d,i) { return i; })
     .attr('x', function(d) { return x1(d.time_bin); })
     .attr('y', function(d) { return y1(d.dist_bin) + .1 * y1(1) + 0.5; })
     .attr('width', 165);
@@ -361,32 +401,42 @@ function display () {
     .data(visItems, function (d) { return d.word; })
     .text(function (d) { return d.word; })
     .attr('x', function(d) { 
-    	return Math.round(x1(d.time_bin+0.1)); 
+    	return Math.round(x1(d.time_bin+0.05)); 
    	})
     .attr('y', function(d) { return y1(d.dist_bin) + .6 * y1(1)})
     .attr('id','hover')
     .style('font-size',function(d) {
-    	console.log(Math.round(wordSizeScale(d.frequency)));
      	if ((maxExtent - minExtent) > 7) {
-    		return Math.round(wordSizeScale(d.frequency)- extentSizeScale(maxExtent-minExtent));
+    		return Math.round(wordSizeScale(d.freqBin)- extentSizeScale(maxExtent-minExtent));
+    		}
+    	if (d.word.length > 8 && wordSizeScale(d.freqBin) >= 16) {
+    		return 14
     		}
     	else {
-    		return Math.round(wordSizeScale(d.frequency))
+    		return Math.round(wordSizeScale(d.freqBin))
     	}
     });
 
   labels.enter().append('svg:text')
     .text(function (d) { return d.word; })
     .attr('x', function(d) { 
-    	return Math.round(x1(d.time_bin+0.1)); 
+    	return Math.round(x1(d.time_bin+0.05)); 
    	})
    	.attr('y', function(d) { return y1(d.dist_bin) + .6 * y1(1) })
     .attr('text-anchor', 'start')
     .attr('class', 'itemLabel')
     .attr('id','hover')
     .style('font-size',function(d) {
-    		return Math.round(wordSizeScale(d.frequency))
-    		})
+     	if ((maxExtent - minExtent) > 7) {
+    		return Math.round(wordSizeScale(d.freqBin)- extentSizeScale(maxExtent-minExtent));
+    		}
+    	if (d.word.length > 8 && wordSizeScale(d.freqBin) >= 16) {
+    		return 14
+    		}
+    	else {
+    		return Math.round(wordSizeScale(d.freqBin))
+    	}
+    })
     .style('font-family', function(d) { 
         if (typeFaceScale(d.objectivity) < 2) { // return arial for both normal and emotional bins
          return 'Arial';
@@ -403,31 +453,31 @@ function display () {
     	var selectedWord = d.word;
     	highlightWords(selectedWord);
     });
-
+    
   labels.order();
   labels.exit().remove();
   
 	function highlightWords (a) {
 		mini.selectAll('miniItems')
-		  .data(jsonData)
+		  .data(switchData)
 		  .enter().append('rect')
 		  .attr('class', function(d) { return 'miniItem '; })
 		  .attr("x",function(d,i) {return x(d.time_bin)})
 		  .attr("y",function(d) {return y2(d.dist_bin+.08)})
 		  .attr("width",x(2)-x(1))
 		  .attr("height",y2(1)*.5)
-		  .style('fill', function(jsonData) {
-		    	var b = Math.round(colorScale(jsonData.positivity));
-	    	if (jsonData.word == a) {
+		  .style('fill', function(switchData) {
+		    	var b = Math.round(colorScale(switchData.positivity));
+	    	if (switchData.word == a) {
 	    		return "rgb(0,200,0)";
 			}
 	    	else {
-	    		var b = 255-(Math.round(colorScale(jsonData.positivity)));
+	    		var b = 255-(Math.round(colorScale(switchData.positivity)));
         			return "rgb(" + redOffset + "," + greenOffset + "," + b + ")";
 	    		}
 		})
 		rects = itemRects.selectAll('rect')
-    		.data(jsonData)
+    		.data(switchData)
     		.transition().duration(1000)
 		    .style('fill', function(d) {
 		    	var b = 255-(Math.round(colorScale(d.positivity)));
