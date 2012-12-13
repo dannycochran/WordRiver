@@ -203,7 +203,7 @@ main.append('rect')
     .attr('ry',5);
 main.append('svg:text')
     .attr('id', 'color')
-    .attr('x', width+37)
+    .attr('x', width+40)
     .attr('y', 45)
     .text('Color')
     .style('font-family', 'Rockwell')
@@ -211,7 +211,7 @@ main.append('svg:text')
     .style('font-size',12);
 main.append('svg:text')
     .attr('id', 'typeFace')
-    .attr('x', width+27)
+    .attr('x', width+28)
     .attr('y', 75)
     .text('Font Type')
     .style('font-family', 'Rockwell')
@@ -219,7 +219,7 @@ main.append('svg:text')
     .style('font-size',12);
 main.append('svg:text')
     .attr('id', 'frequency')
-    .attr('x', width+27)
+    .attr('x', width+31)
     .attr('y', 105)
     .text('Font Size')
     .style('font-family', 'Rockwell')
@@ -233,17 +233,18 @@ main.append('svg:text')
     .style('font-size',12);
 main.append('rect')
 	.attr('class','button')
-    .attr('x', width+10)
+    .attr('x', width+12)
     .attr('y', 148)
-    .attr('width',105)
+    .attr('width',90)
     .attr('height',20)
     .style('fill','#4099FF')
     .attr('rx',5)
     .attr('ry',5);
 main.append('svg:text')
-    .attr('x', width+17)
+		.attr('id', 'retweet-toggle')
+    .attr('x', width+19)
     .attr('y', 162)
-    .text('Cycle Retweets')
+    .text('Retweets: Off') // Toggles between on and off
     .style('font-family', 'Rockwell')
     .style('fill','white')
     .style('font-size',12)
@@ -340,10 +341,16 @@ display();
 
 function switchAllData() {
 	if (checkData == 0) {
+		main.select('#retweet-toggle')
+				.text('Retweets: On');
 		checkData = 1;
 		switchData = jsonDataRTFilter;
-		}
-	else {checkData = 0; switchData = jsonDataFilter;}
+	} else {
+		main.select('#retweet-toggle')
+				.text('Retweets: Off');
+		checkData = 0;
+		switchData = jsonDataFilter;
+	}
 	display();
 }
 
